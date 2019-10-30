@@ -1,5 +1,8 @@
 package util;
 
+import algorithm.TrussDecomposition;
+import org.apache.log4j.Logger;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -9,6 +12,7 @@ import java.util.Hashtable;
  * Export the result to a file
  */
 public class Export {
+    private static Logger LOGGER = Logger.getLogger(Export.class);
 
     /**
      * write the result to a file
@@ -24,9 +28,9 @@ public class Export {
 
         String fileName="outputs\\"+algorithmName+"_"+datasetName;
 
-        if (debug>0) {
-            System.err.println("Exporting graph... " + fileName);
-        }
+        if (debug>0)
+            LOGGER.info("Exporting graph... ");
+
 
         BufferedWriter bw = new BufferedWriter(new FileWriter(fileName));
         bw.write("takenTime:"+takenTime+"ms");
@@ -38,7 +42,7 @@ public class Export {
         bw.close();
 
         if (debug>0)
-            System.err.println("Graph was exported.: " + fileName);
+            LOGGER.info("Graph was exported.: " + fileName);
 
     }
 }
