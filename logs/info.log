@@ -1,18 +1,18 @@
-2019-10-30 15:43:20 [Thread:main][ Class:util.GraphImport >> Method: util.GraphImport.load(GraphImport.java:30) ]
+2019-10-31 09:22:38 [Thread:main][ Class:util.GraphImport >> Method: util.GraphImport.load(GraphImport.java:30) ]
 INFO:loading graph...: datasets\input.txt
-2019-10-30 15:43:20 [Thread:main][ Class:util.GraphImport >> Method: util.GraphImport.load(GraphImport.java:75) ]
-ERROR:graph was loaded: datasets\input.txt
-2019-10-30 15:43:20 [Thread:main][ Class:algorithm.TrussDecomposition >> Method: algorithm.TrussDecomposition.run(TrussDecomposition.java:23) ]
+2019-10-31 09:22:38 [Thread:main][ Class:util.GraphImport >> Method: util.GraphImport.load(GraphImport.java:75) ]
+INFO:graph was loaded: datasets\input.txt
+2019-10-31 09:22:38 [Thread:main][ Class:algorithm.TrussDecomposition >> Method: algorithm.TrussDecomposition.run(TrussDecomposition.java:23) ]
 INFO:computing truss decomposition...
-2019-10-30 15:43:20 [Thread:main][ Class:algorithm.TrussDecomposition >> Method: algorithm.TrussDecomposition.run(TrussDecomposition.java:52) ]
+2019-10-31 09:22:38 [Thread:main][ Class:algorithm.TrussDecomposition >> Method: algorithm.TrussDecomposition.run(TrussDecomposition.java:52) ]
 INFO:Progress:0/5
-2019-10-30 15:43:20 [Thread:main][ Class:algorithm.TrussDecomposition >> Method: algorithm.TrussDecomposition.run(TrussDecomposition.java:52) ]
+2019-10-31 09:22:38 [Thread:main][ Class:algorithm.TrussDecomposition >> Method: algorithm.TrussDecomposition.run(TrussDecomposition.java:52) ]
 INFO:Progress:2/5
-2019-10-30 15:43:20 [Thread:main][ Class:algorithm.TrussDecomposition >> Method: algorithm.TrussDecomposition.run(TrussDecomposition.java:52) ]
+2019-10-31 09:22:38 [Thread:main][ Class:algorithm.TrussDecomposition >> Method: algorithm.TrussDecomposition.run(TrussDecomposition.java:52) ]
 INFO:Progress:5/5
-2019-10-30 15:43:20 [Thread:main][ Class:algorithm.TrussDecomposition >> Method: algorithm.TrussDecomposition.run(TrussDecomposition.java:110) ]
+2019-10-31 09:22:38 [Thread:main][ Class:algorithm.TrussDecomposition >> Method: algorithm.TrussDecomposition.run(TrussDecomposition.java:110) ]
 INFO:Truss decomposition is computed...
-2019-10-30 15:43:20 [Thread:main][ Class:util.Export >> Method: util.Export.writeFile(Export.java:32) ]
+2019-10-31 09:22:38 [Thread:main][ Class:util.Export >> Method: util.Export.writeFile(Export.java:32) ]
 INFO:Exporting graph... 
-2019-10-30 15:43:20 [Thread:main][ Class:util.Export >> Method: util.Export.writeFile(Export.java:45) ]
+2019-10-31 09:22:38 [Thread:main][ Class:util.Export >> Method: util.Export.writeFile(Export.java:45) ]
 INFO:Graph was exported.: outputs\ALG_trussDecomp_input.txt

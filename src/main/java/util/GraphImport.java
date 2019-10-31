@@ -72,7 +72,7 @@ public class GraphImport {
         }
 
         if(debug>0)
-            LOGGER.error("graph was loaded: "+path);
+            LOGGER.info("graph was loaded: "+path);
 
         return new Graph(adjMap,edgeSet);
     }

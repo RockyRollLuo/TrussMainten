@@ -3,9 +3,7 @@ package algorithm;
 import org.apache.log4j.Logger;
 import util.*;
 
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.TreeSet;
+import java.util.*;
 
 public class SupTruss {
     private static Logger LOGGER = Logger.getLogger(TrussDecomposition.class);
@@ -111,6 +109,9 @@ public class SupTruss {
 
         //v1 or v2 is new
         if ((!adjMap.keySet().contains(v1)) || (!adjMap.keySet().contains(v2))) {
+            adjMap.get(v2).add(v1);
+            adjMap.get(v1).add(v2);
+            edgeSet.add(e0);
             trussMap.put(e0, 2);
             return new Result(trussMap, System.currentTimeMillis() - startTime, this.getClass().toString());
         }
@@ -120,17 +121,34 @@ public class SupTruss {
         TreeSet<Integer> setCommon = (TreeSet<Integer>) set1.clone();
         setCommon.retainAll(set2);
 
-        ArrayList<Integer> trussList = new ArrayList<>();
+        ArrayList<Integer> commonTrussList = new ArrayList<>();
         for (int w : setCommon) {
             Edge e1 = new Edge(v1, w);
             Edge e2 = new Edge(v2, w);
-            trussList.add(Math.min(trussMap.get(e1), trussMap.get(e2)));
-
-            //TODO: ssMap[e0],psMap[e0],LB
-
-
-
+            commonTrussList.add(Math.min(trussMap.get(e1), trussMap.get(e2)));
         }
+
+        //TODO:compute t_e0_LB
+        int t_common_min = Collections.min(commonTrussList);
+        int t_common_max = Collections.max(commonTrussList);
+        HashMap<Integer, Integer> countMap = new HashMap<>();
+        for (int i = t_common_min; i <t_common_max+1 ; i++) {
+            int count=0;
+            for (int j:commonTrussList) {
+                if(j>=i) count++;
+            }
+            countMap.put(i, count);
+        }
+
+
+
+
+
+        int sSup=0;
+        int pSup=0;
+
+
+        //TODO: ssMap[e0],psMap[e0],LB
 
 
 
