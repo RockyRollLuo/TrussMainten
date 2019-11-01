@@ -29,7 +29,6 @@ public class SupTruss {
         return edgeInsertion(newGraph, e0, debug);
     }
 
-
     /**
      * one edge insertion
      *
@@ -54,7 +53,7 @@ public class SupTruss {
         Hashtable<Edge, Integer> trussMap = (Hashtable<Edge, Integer>) result1.getOutput();
 
         //compute SustainSupport
-        Hashtable<Edge, Integer> sSMap = new Hashtable<>();
+        Hashtable<Edge, Integer> sSupMap = new Hashtable<>();
         for (Edge e : edgeSet) {
             int v1 = e.getV1();
             int v2 = e.getV2();
@@ -70,11 +69,11 @@ public class SupTruss {
                 if (trussMap.get(e) <= Math.min(trussMap.get(e1), trussMap.get(e2)))
                     ss++;
             }
-            sSMap.put(e, ss);
+            sSupMap.put(e, ss);
         }
 
         //compute PivotalSupport
-        Hashtable<Edge, Integer> pSMap = new Hashtable<>();
+        Hashtable<Edge, Integer> pSupMap = new Hashtable<>();
         for (Edge e : edgeSet) {
             int v1 = e.getV1();
             int v2 = e.getV2();
@@ -92,11 +91,11 @@ public class SupTruss {
                 int t2 = trussMap.get(e2);
 
                 if (t1 > t0 && t2 > t0) ps++;
-                else if (t1 == t0 && t2 > t0 && sSMap.get(e1) > t0 - 2) ps++;
-                else if (t2 == t0 && t1 > t0 && sSMap.get(e2) > t0 - 2) ps++;
-                else if (t1 == t0 && t2 == t0 && sSMap.get(e1) > t0 - 2 && sSMap.get(e2) > t0 - 2) ps++;
+                else if (t1 == t0 && t2 > t0 && sSupMap.get(e1) > t0 - 2) ps++;
+                else if (t2 == t0 && t1 > t0 && sSupMap.get(e2) > t0 - 2) ps++;
+                else if (t1 == t0 && t2 == t0 && sSupMap.get(e1) > t0 - 2 && sSupMap.get(e2) > t0 - 2) ps++;
             }
-            pSMap.put(e, ps);
+            pSupMap.put(e, ps);
         }
 
         /**
@@ -139,25 +138,91 @@ public class SupTruss {
             countMap.put(i, count);
         }
         int key_truss = 2;
-        while (key_truss <= countMap.get(key_truss)+2) {
+        while (key_truss <= countMap.get(key_truss) + 2) {
             key_truss++;
         }
-        int t_e0_LB=key_truss-1;
+        int t_e0_LB = key_truss - 1;
 
         //compute sSup
         int sSup = 0;
         for (int i : commonTrussList) {
-            if(i>=t_e0_LB)
+            if (i >= t_e0_LB)
                 sSup++;
         }
 
-        //TODO:compute pSup
+        //compute pSup
         int pSup = 0;
+        for (int w : setCommon) {
+            Edge e1 = new Edge(w, v1);
+            Edge e2 = new Edge(w, v2);
+
+            if (trussMap.get(e1) > t_e0_LB && trussMap.get(e2) > t_e0_LB) {
+                pSup++;
+            } else if (trussMap.get(e1) > t_e0_LB && trussMap.get(e2) == t_e0_LB && sSupMap.get(e2) > t_e0_LB - 2) {
+                pSup++;
+            } else if (trussMap.get(e1) == t_e0_LB && trussMap.get(e2) > t_e0_LB && sSupMap.get(e1) > t_e0_LB - 2) {
+                pSup++;
+            } else if (trussMap.get(e1) == t_e0_LB && trussMap.get(e2) == t_e0_LB && sSupMap.get(e1) > t_e0_LB - 2 && sSupMap.get(e2) > t_e0_LB - 2) {
+                pSup++;
+            }
+        }
+
+        //compute upper bound
+        int t_e0_UB = t_e0_LB;
+        if (pSup > t_e0_LB - 2) {
+            t_e0_UB = t_e0_LB + 1;
+        }
+
+        //PES
+        TreeSet<Edge> promoteEdgeSet = new TreeSet<>();
+        for (int w : setCommon) {
+            Edge e1 = new Edge(w, v1);
+            Edge e2 = new Edge(w, v2);
+
+            if (trussMap.get(e1) < t_e0_UB) {
+                promoteEdgeSet.add(e1);
+            }
+            if (trussMap.get(e2) < t_e0_UB) {
+                promoteEdgeSet.add(e2);
+            }
+        }
+
+        //initial
+        Hashtable<Edge, Boolean> edgeVisitedMap = new Hashtable<>();
+        Hashtable<Edge, Boolean> edgeElimainateMap = new Hashtable<>();
+        Hashtable<Edge, Integer> sMap = new Hashtable<>();
+        for (Edge e : edgeSet) {
+            edgeVisitedMap.put(e, false);
+            edgeElimainateMap.put(e, false);
+            sMap.put(e, 0);
+        }
+
+        //
+        for (Edge e_root : promoteEdgeSet) {
+            int t_root = trussMap.get(e_root);
+            sMap.put(e_root, pSupMap.get(e_root));
+            edgeVisitedMap.put(e_root, true);
+
+            Stack<Edge> stack = new Stack<>();
+            stack.push(e_root);
+            while (!stack.empty()) {
+                Edge e = stack.pop();
+                if (sMap.get(e) > t_root - 2) {
+                    int a = e.getV1();
+                    int b= e.getV2();
+                    TreeSet<Integer> setA = adjMap.get(a);
+                    TreeSet<Integer> setB = adjMap.get(b);
 
 
-        //TODO:traversal
 
 
+                }
+
+
+            }
+
+
+        }
 
 
         long endTime = System.currentTimeMillis();
