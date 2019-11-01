@@ -11,7 +11,7 @@ public class SupTruss {
     /**
      * one random edge insertion
      *
-     * @param graph
+     * @param graph the object of Graph
      * @param debug
      * @return
      */
@@ -128,27 +128,34 @@ public class SupTruss {
             commonTrussList.add(Math.min(trussMap.get(e1), trussMap.get(e2)));
         }
 
-        //TODO:compute t_e0_LB
-        int t_common_min = Collections.min(commonTrussList);
+        //compute t_e0_LB
         int t_common_max = Collections.max(commonTrussList);
         HashMap<Integer, Integer> countMap = new HashMap<>();
-        for (int i = t_common_min; i <t_common_max+1 ; i++) {
-            int count=0;
-            for (int j:commonTrussList) {
-                if(j>=i) count++;
+        for (int i = 2; i < t_common_max + 1; i++) {
+            int count = 0;
+            for (int j : commonTrussList) {
+                if (j >= i) count++;
             }
             countMap.put(i, count);
         }
+        int key_truss = 2;
+        while (key_truss <= countMap.get(key_truss)+2) {
+            key_truss++;
+        }
+        int t_e0_LB=key_truss-1;
+
+        //compute sSup
+        int sSup = 0;
+        for (int i : commonTrussList) {
+            if(i>=t_e0_LB)
+                sSup++;
+        }
+
+        //TODO:compute pSup
+        int pSup = 0;
 
 
-
-
-
-        int sSup=0;
-        int pSup=0;
-
-
-        //TODO: ssMap[e0],psMap[e0],LB
+        //TODO:traversal
 
 
 
