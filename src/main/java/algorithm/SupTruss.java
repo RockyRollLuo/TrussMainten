@@ -206,14 +206,36 @@ public class SupTruss {
             Stack<Edge> stack = new Stack<>();
             stack.push(e_root);
             while (!stack.empty()) {
-                Edge e = stack.pop();
-                if (sMap.get(e) > t_root - 2) {
-                    int a = e.getV1();
-                    int b= e.getV2();
+                Edge e_stack = stack.pop();
+                if (sMap.get(e_stack) > t_root - 2) {
+                    int a = e_stack.getV1();
+                    int b = e_stack.getV2();
                     TreeSet<Integer> setA = adjMap.get(a);
                     TreeSet<Integer> setB = adjMap.get(b);
+                    TreeSet<Integer> setC = (TreeSet<Integer>) setA.clone();
+                    setC.retainAll(setB);
 
+                    for (int c : setC) {
+                        Edge ac = new Edge(a, c);
+                        Edge bc = new Edge(b, c);
 
+                        if (trussMap.get(ac) == t_root && trussMap.get(bc) > t_root && sSupMap.get(ac) > t_root - 2 && edgeVisitedMap.get(ac) == false) {
+                            stack.push(ac);
+                            edgeVisitedMap.put(ac, true);
+                            int s_ac = sMap.get(ac);
+                            sMap.put(ac, s_ac + pSupMap.get(ac));
+                        }
+                        if (trussMap.get(bc) == t_root && trussMap.get(ac) > t_root) {
+
+                        }
+                        if (trussMap.get(ac) == t_root && trussMap.get(bc) == t_root) {
+
+                        }
+                    }
+                } else {
+                    if (edgeElimainateMap.get(e_stack) == false) {
+                        eliminate(adjMap, trussMap, sMap, edgeElimainateMap, t_root, e_stack);
+                    }
 
 
                 }
@@ -232,6 +254,40 @@ public class SupTruss {
             LOGGER.info("Truss decomposition is computed");
         return result;
     }
+
+    private void eliminate(Hashtable<Integer, TreeSet<Integer>> adjMap, Hashtable<Edge, Integer> trussMap, Hashtable<Edge, Integer> sMap, Hashtable<Edge, Boolean> edgeElimanateMap, int t_root, Edge edge) {
+        edgeElimanateMap.put(edge, Boolean.TRUE);
+        int a = edge.getV1();
+        int b = edge.getV2();
+        TreeSet<Integer> setA = adjMap.get(a);
+        TreeSet<Integer> setB = adjMap.get(b);
+        TreeSet<Integer> setC = (TreeSet<Integer>) setA.clone();
+        setC.retainAll(setB);
+        for (int c : setC) {
+            Edge ac = new Edge(a, c);
+            Edge bc = new Edge(b, c);
+            if (Math.min(trussMap.get(ac), trussMap.get(bc)) >= t_root) {
+                if (trussMap.get(ac) == t_root - 2) {
+                    int s_ac = sMap.get(ac) - 1;
+                    sMap.put(ac, s_ac);
+
+                    if (s_ac == t_root - 2 && edgeElimanateMap.get(ac) == false) {
+                        eliminate(adjMap, trussMap, sMap, edgeElimanateMap, t_root, ac);
+                    }
+                }
+
+                if (trussMap.get(bc) == t_root - 2) {
+                    int s_bc = sMap.get(bc) - 1;
+                    sMap.put(ac, s_bc);
+
+                    if (s_bc == t_root - 2 && edgeElimanateMap.get(bc) == false) {
+                        eliminate(adjMap, trussMap, sMap, edgeElimanateMap, t_root, bc);
+                    }
+                }
+            }
+        }
+    }
+
 
     /***
      * edges insertion
