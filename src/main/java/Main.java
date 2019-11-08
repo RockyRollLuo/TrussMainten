@@ -29,9 +29,14 @@ public class Main {
         Graph graph = GraphImport.load(datasetName, delim, debug);
 
         //get result
-        SupTruss supTruss = new SupTruss();
-        Result result = supTruss.edgeInsertion(graph, debug);
-        result.setAlgorithmName("SupTruss");
+//        SupTruss supTruss = new SupTruss();
+//        Result result = supTruss.edgeInsertion(graph, debug);
+//        result.setAlgorithmName("SupTruss");
+//        result.setDatasetName(datasetName);
+
+        TrussDecomposition trussDecomposition = new TrussDecomposition(graph);
+        Result result = trussDecomposition.run(debug);
+        result.setAlgorithmName("TrussDecomposition");
         result.setDatasetName(datasetName);
 
         //print result

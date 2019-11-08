@@ -12,13 +12,18 @@ import java.util.TreeSet;
 public class TrussDecomposition {
     private static Logger LOGGER = Logger.getLogger(TrussDecomposition.class);
 
+    private Graph graph;
+
+    public TrussDecomposition(Graph graph) {
+        this.graph = graph;
+    }
+
     /**
      * compute the trussness of vertices in the given graph
-     * @param graph   input graph
      * @param debug debug level
      * @return trussness of edges
      */
-    public static Result run(Graph graph, int debug) {
+    public Result run( int debug) {
         if (debug>0) {
             LOGGER.info("computing truss decomposition...");
         }

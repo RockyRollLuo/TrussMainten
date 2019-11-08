@@ -50,7 +50,8 @@ public class SupTruss {
         }
 
         //compute truss
-        Hashtable<Edge, Integer> trussMap = (Hashtable<Edge, Integer>) TrussDecomposition.run(graph, debug).getOutput();
+        TrussDecomposition trussDecomposition = new TrussDecomposition(graph);
+        Hashtable<Edge, Integer> trussMap = (Hashtable<Edge, Integer>) trussDecomposition.run(debug).getOutput();
 
         //compute SustainSupport
         Hashtable<Edge, Integer> sSupMap = new Hashtable<>();
@@ -320,7 +321,8 @@ public class SupTruss {
         }
 
         //compute old graph trussness
-        Hashtable<Edge, Integer> trussMap = (Hashtable<Edge, Integer>) TrussDecomposition.run(graph, debug).getOutput();
+        TrussDecomposition trussDecomposition = new TrussDecomposition(graph);
+        Hashtable<Edge, Integer> trussMap = (Hashtable<Edge, Integer>) trussDecomposition.run(debug).getOutput();
 
         //Construct new graph
         TreeSet<Edge> edgeSet = (TreeSet<Edge>) oldEdgeSet.clone();
