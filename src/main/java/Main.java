@@ -1,5 +1,5 @@
 import algorithm.SupTruss;
-import algorithm.TrussDecomposition;
+import algorithm.TrussDecomp;
 import util.*;
 import util.SetOpt.Option;
 
@@ -28,15 +28,16 @@ public class Main {
         String datasetName = args[0];
         Graph graph = GraphImport.load(datasetName, delim, debug);
 
-        //get result
+        //supTruss
 //        SupTruss supTruss = new SupTruss();
 //        Result result = supTruss.edgeInsertion(graph, debug);
 //        result.setAlgorithmName("SupTruss");
 //        result.setDatasetName(datasetName);
 
-        TrussDecomposition trussDecomposition = new TrussDecomposition(graph);
-        Result result = trussDecomposition.run(debug);
-        result.setAlgorithmName("TrussDecomposition");
+        //trussDecomp
+        TrussDecomp trussDecomp = new TrussDecomp(graph);
+        Result result = trussDecomp.run(debug);
+        result.setAlgorithmName("TrussDecomp");
         result.setDatasetName(datasetName);
 
         //print result

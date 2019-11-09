@@ -6,7 +6,7 @@ import util.*;
 import java.util.*;
 
 public class SupTruss {
-    private static Logger LOGGER = Logger.getLogger(TrussDecomposition.class);
+    private static Logger LOGGER = Logger.getLogger(SupTruss.class);
 
     /**
      * one random edge insertion
@@ -15,7 +15,7 @@ public class SupTruss {
      * @param debug
      * @return
      */
-    public Result edgeInsertion(Graph graph, int debug) {
+    public Result edgeInsertion(Graph graph, int debug){
         Hashtable<Integer, TreeSet<Integer>> oldAdjMap = graph.getAdjMap();
         TreeSet<Edge> oldEdgeSet = graph.getEdgeSet();
 
@@ -37,7 +37,7 @@ public class SupTruss {
      * @param debug
      * @return
      */
-    public Result edgeInsertion(Graph graph, Edge e0, int debug) {
+    public Result edgeInsertion(Graph graph, Edge e0, int debug){
         if (debug > 0)
             LOGGER.info("SupTruss Insertion one edge %s:" + e0.toString());
 
@@ -50,8 +50,8 @@ public class SupTruss {
         }
 
         //compute truss
-        TrussDecomposition trussDecomposition = new TrussDecomposition(graph);
-        Hashtable<Edge, Integer> trussMap = (Hashtable<Edge, Integer>) trussDecomposition.run(debug).getOutput();
+        TrussDecomp trussDecomp = new TrussDecomp(graph);
+        Hashtable<Edge, Integer> trussMap = (Hashtable<Edge, Integer>) trussDecomp.run(debug).getOutput();
 
         //compute SustainSupport
         Hashtable<Edge, Integer> sSupMap = new Hashtable<>();
@@ -109,8 +109,7 @@ public class SupTruss {
 
         //v1 or v2 is new
         if ((!adjMap.keySet().contains(v1)) || (!adjMap.keySet().contains(v2))) {
-            adjMap.get(v2).add(v1);
-            adjMap.get(v1).add(v2);
+            adjMap = GraphHandler.insertEdgeToAdjMap(adjMap, e0);
             edgeSet.add(e0);
             trussMap.put(e0, 2);
             return new Result(trussMap, System.currentTimeMillis() - startTime, this.getClass().toString());
@@ -143,6 +142,8 @@ public class SupTruss {
             key_truss++;
         }
         int t_e0_LB = key_truss - 1;
+        trussMap.put(e0, t_e0_LB);
+
 
         //compute sSup
         int sSup = 0;
@@ -253,16 +254,16 @@ public class SupTruss {
             }
         }
 
-        Hashtable<Edge, Integer> newTrussMap = (Hashtable<Edge, Integer>) trussMap.clone();
+//        Hashtable<Edge, Integer> newTrussMap = (Hashtable<Edge, Integer>) trussMap.clone();
         for (Edge e : edgeSet) {
             if (edgeVisitedMap.get(e) && !edgeElimainateMap.get(e)) {
-                int t = newTrussMap.get(e);
-                newTrussMap.put(e, t + 1);
+                int t = trussMap.get(e);
+                trussMap.put(e, t + 1);
             }
         }
 
         long endTime = System.currentTimeMillis();
-        Result result = new Result(newTrussMap, endTime - startTime, this.getClass().toString());
+        Result result = new Result(trussMap, endTime - startTime, this.getClass().toString());
 
         if (debug > 0)
             LOGGER.info("Truss decomposition is computed");
@@ -292,7 +293,7 @@ public class SupTruss {
      * @param debug
      * @return
      */
-    public Result edgeDeletion(Graph graph, int debug) {
+    public Result edgeDeletion(Graph graph, int debug)  {
         TreeSet<Edge> edgeSet = graph.getEdgeSet();
 
         Edge e0 = RandomUtils.getRandomElement(edgeSet);
@@ -308,7 +309,7 @@ public class SupTruss {
      * @param debug
      * @return
      */
-    public Result edgeDeletion(Graph graph, Edge e0, int debug) {
+    public Result edgeDeletion(Graph graph, Edge e0, int debug){
         if (debug > 0)
             LOGGER.info("SupTruss deletion one edge:" + e0.toString());
 
@@ -321,8 +322,8 @@ public class SupTruss {
         }
 
         //compute old graph trussness
-        TrussDecomposition trussDecomposition = new TrussDecomposition(graph);
-        Hashtable<Edge, Integer> trussMap = (Hashtable<Edge, Integer>) trussDecomposition.run(debug).getOutput();
+        TrussDecomp trussDecomp= new TrussDecomp(graph);
+        Hashtable<Edge, Integer> trussMap = (Hashtable<Edge, Integer>) trussDecomp.run(debug).getOutput();
 
         //Construct new graph
         TreeSet<Edge> edgeSet = (TreeSet<Edge>) oldEdgeSet.clone();
