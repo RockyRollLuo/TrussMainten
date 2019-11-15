@@ -1,13 +1,14 @@
 package util;
 
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.TreeSet;
 
 public class Graph implements Cloneable{
-    private Hashtable<Integer, TreeSet<Integer>> adjMap;
-    private TreeSet<Edge> edgeSet;
+    private Hashtable<Integer, LinkedList<Integer>> adjMap;
+    private LinkedList<Edge> edgeSet;
 
-    public Graph(Hashtable<Integer, TreeSet<Integer>> adjMap, TreeSet<Edge> edgeSet) {
+    public Graph(Hashtable<Integer, LinkedList<Integer>> adjMap, LinkedList<Edge> edgeSet) {
         this.adjMap = adjMap;
         this.edgeSet = edgeSet;
     }
@@ -19,10 +20,10 @@ public class Graph implements Cloneable{
 
     @Override
     public Graph clone(){
-        TreeSet<Edge> newEdgeSet = (TreeSet<Edge>) edgeSet.clone();
-        Hashtable<Integer, TreeSet<Integer>> newAdjMap = new Hashtable<>();
+        LinkedList<Edge> newEdgeSet = (LinkedList<Edge>) edgeSet.clone();
+        Hashtable<Integer, LinkedList<Integer>> newAdjMap = new Hashtable<>();
         for (int i : adjMap.keySet()) {
-            TreeSet<Integer> adjList = (TreeSet<Integer>) adjMap.get(i).clone();
+            LinkedList<Integer> adjList = (LinkedList<Integer>) adjMap.get(i).clone();
             newAdjMap.put(i, adjList);
         }
         return new Graph(newAdjMap, newEdgeSet);
@@ -31,19 +32,19 @@ public class Graph implements Cloneable{
     /**
      * Getter() and Setter()
      */
-    public Hashtable<Integer, TreeSet<Integer>> getAdjMap() {
+    public Hashtable<Integer, LinkedList<Integer>> getAdjMap() {
         return adjMap;
     }
 
-    public void setAdjMap(Hashtable<Integer, TreeSet<Integer>> adjMap) {
+    public void setAdjMap(Hashtable<Integer, LinkedList<Integer>> adjMap) {
         this.adjMap = adjMap;
     }
 
-    public TreeSet<Edge> getEdgeSet() {
+    public LinkedList<Edge> getEdgeSet() {
         return edgeSet;
     }
 
-    public void setEdgeSet(TreeSet<Edge> edgeSet) {
+    public void setEdgeSet(LinkedList<Edge> edgeSet) {
         this.edgeSet = edgeSet;
     }
 }

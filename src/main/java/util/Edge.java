@@ -1,5 +1,6 @@
 package util;
 
+import java.util.LinkedList;
 import java.util.TreeSet;
 
 public class Edge implements Comparable<Edge>, Cloneable {
@@ -72,8 +73,10 @@ public class Edge implements Comparable<Edge>, Cloneable {
         Edge e2 = new Edge(0, 2);
         Edge e3 = new Edge(0, 1);
         Edge e4 = new Edge(1, 4);
+        Edge e5 = new Edge(3, 7);
 
-        TreeSet<Edge> set = new TreeSet<>();
+//        TreeSet<Edge> set = new TreeSet<>();
+        LinkedList<Edge> set = new LinkedList<>();
         set.add(e1);
         set.add(e2);
         set.add(e3);
@@ -81,6 +84,7 @@ public class Edge implements Comparable<Edge>, Cloneable {
 
         System.out.println(set);
         set.remove(e1);
+        set.add(e5);
         System.out.println(set);
         set.remove(e2);
         System.out.println(set);

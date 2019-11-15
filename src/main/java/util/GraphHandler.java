@@ -1,6 +1,7 @@
 package util;
 
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -12,10 +13,10 @@ public class GraphHandler {
      * @param e removed edge
      * @return new adjMap
      */
-    public static Hashtable<Integer, TreeSet<Integer>> romveEdgeFromAdjMap(Hashtable<Integer, TreeSet<Integer>> adjMap, Edge e) {
-        Hashtable<Integer, TreeSet<Integer>> newAdjMap = (Hashtable<Integer, TreeSet<Integer>>) adjMap.clone();
-        int v1 = e.getV1();
-        int v2 = e.getV2();
+    public static Hashtable<Integer, LinkedList<Integer>> romveEdgeFromAdjMap(Hashtable<Integer, LinkedList<Integer>> adjMap, Edge e) {
+        Hashtable<Integer, LinkedList<Integer>> newAdjMap = (Hashtable<Integer, LinkedList<Integer>>) adjMap.clone();
+        Integer v1 = e.getV1();
+        Integer v2 = e.getV2();
 
         Set<Integer> keySet = newAdjMap.keySet();
         if (keySet.contains(v1)) {
@@ -39,23 +40,23 @@ public class GraphHandler {
      * @param e inserted edge
      * @return new adjMap
      */
-    public static Hashtable<Integer, TreeSet<Integer>> insertEdgeToAdjMap(Hashtable<Integer, TreeSet<Integer>> adjMap, Edge e) {
-        Hashtable<Integer, TreeSet<Integer>> newAdjMap = (Hashtable<Integer, TreeSet<Integer>>) adjMap.clone();
-        int v1 = e.getV1();
-        int v2 = e.getV2();
+    public static Hashtable<Integer, LinkedList<Integer>> insertEdgeToAdjMap(Hashtable<Integer, LinkedList<Integer>> adjMap, Edge e) {
+        Hashtable<Integer, LinkedList<Integer>> newAdjMap = (Hashtable<Integer, LinkedList<Integer>>) adjMap.clone();
+        Integer v1 = e.getV1();
+        Integer v2 = e.getV2();
 
         Set<Integer> keySet = newAdjMap.keySet();
         if (keySet.contains(v1)) {
             newAdjMap.get(v1).add(v2);
         }else {
-            TreeSet<Integer> v1AdjList = new TreeSet<>();
+            LinkedList<Integer> v1AdjList = new LinkedList<>();
             v1AdjList.add(v2);
             newAdjMap.put(v1, v1AdjList);
         }
         if (keySet.contains(v2)) {
             newAdjMap.get(v2).add(v1);
         } else {
-            TreeSet<Integer> v2AdjList = new TreeSet<>();
+            LinkedList<Integer> v2AdjList = new LinkedList<>();
             v2AdjList.add(v1);
             newAdjMap.put(v2, v2AdjList);
         }
@@ -69,8 +70,8 @@ public class GraphHandler {
      * @param changeEdges
      * @return
      */
-    public static Hashtable<Integer, TreeSet<Integer>> removeEdgesFromAdjMap(Hashtable<Integer, TreeSet<Integer>> adjMap, TreeSet<Edge> changeEdges) {
-        Hashtable<Integer, TreeSet<Integer>> newAdjMap = (Hashtable<Integer, TreeSet<Integer>>) adjMap.clone();
+    public static Hashtable<Integer, LinkedList<Integer>> removeEdgesFromAdjMap(Hashtable<Integer, LinkedList<Integer>> adjMap, LinkedList<Edge> changeEdges) {
+        Hashtable<Integer, LinkedList<Integer>> newAdjMap = (Hashtable<Integer, LinkedList<Integer>>) adjMap.clone();
 
         for (Edge e : changeEdges) {
             romveEdgeFromAdjMap(newAdjMap, e);
