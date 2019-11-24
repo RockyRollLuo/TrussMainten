@@ -28,16 +28,15 @@ public class Main {
         String datasetName = args[0];
         Graph graph = GraphImport.load(datasetName, delim, debug);
 
-//        supTruss
-        SupTruss supTruss = new SupTruss();
-        Result result = supTruss.edgeInsertion(graph, debug);
-        result.setAlgorithmName("SupTruss");
+        //supTruss
+        SupTruss supTruss = new SupTruss(graph);
+        Edge edge = new Edge(4, 5);
+        Result result = supTruss.edgeInsertion(graph, edge);
         result.setDatasetName(datasetName);
 
         //trussDecomp
 //        TrussDecomp trussDecomp = new TrussDecomp(graph);
-//        Result result = trussDecomp.run(debug);
-//        result.setAlgorithmName("TrussDecomp");
+//        Result result = trussDecomp.run();
 //        result.setDatasetName(datasetName);
 
         //print result

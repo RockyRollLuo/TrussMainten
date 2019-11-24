@@ -20,14 +20,10 @@ public class TrussDecomp {
 
     /**
      * compute the trussness of vertices in the given graph
-     *
-     * @param debug debug level
      * @return trussness of edges
      */
-    public Result run(int debug) {
-        if (debug > 0) {
-            LOGGER.info("computing truss decomposition...");
-        }
+    public Result run() {
+        LOGGER.info("computing truss decomposition...");
 
         long startTime = System.currentTimeMillis();
 
@@ -58,8 +54,7 @@ public class TrussDecomp {
 
         final int m = remainEdges.size();
         for (int t = 2; ; t++) {
-            if (debug > 0)
-                LOGGER.info("Progress:" + (m - remainEdges.size()) + "/" + m);
+            LOGGER.info("Progress:" + (m - remainEdges.size()) + "/" + m);
 
             if (remainEdges.isEmpty())
                 break;
@@ -104,10 +99,9 @@ public class TrussDecomp {
         }
 
         long endTime = System.currentTimeMillis();
-        Result result = new Result(trussMap, endTime - startTime, TrussDecomp.class.toString());
+        Result result = new Result(trussMap, endTime - startTime, "TrussDecomp");
 
-        if (debug > 0)
-            LOGGER.info("Truss decomp is computed...");
+//        LOGGER.info("Truss decomp is computed...");
         return result;
     }
 
