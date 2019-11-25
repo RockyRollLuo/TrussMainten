@@ -6,6 +6,11 @@ import java.util.*;
 
 public class GraphHandler {
 
+    /**
+     * clone a adjMap
+     * @param adjMap
+     * @return
+     */
     public static Hashtable<Integer, LinkedList<Integer>> deepCloneAdjMap(Hashtable<Integer, LinkedList<Integer>> adjMap) {
         Hashtable<Integer, LinkedList<Integer>> newAdjMap = new Hashtable<>();
         for (Integer i : adjMap.keySet()) {
@@ -76,7 +81,6 @@ public class GraphHandler {
 
     /**
      * remove a set of edges from adjMap
-     *
      * @param adjMap
      * @param changeEdges
      * @return
@@ -90,6 +94,24 @@ public class GraphHandler {
         return newAdjMap;
     }
 
+    /**
+     * remove a set of edges from a graph
+     * @param graph
+     * @param changedEdges
+     * @return new graph
+     */
+    public static Graph removeEdgesFromGraph(Graph graph, LinkedList<Edge> changedEdges) {
+        LinkedList<Edge> oldEdgeSet = graph.getEdgeSet();
+        Hashtable<Integer, LinkedList<Integer>> oldAdjMap = graph.getAdjMap();
+
+        LinkedList<Edge> newEdgeSet = (LinkedList<Edge>) oldEdgeSet.clone();
+        newEdgeSet.removeAll(changedEdges);
+
+        Hashtable<Integer, LinkedList<Integer>> newAdjMap = deepCloneAdjMap(oldAdjMap);
+        newAdjMap = removeEdgesFromAdjMap(newAdjMap, changedEdges);
+
+        return new Graph(newAdjMap, newEdgeSet);
+    }
 
     /**
      * compute the trussness of e based on the locality property
