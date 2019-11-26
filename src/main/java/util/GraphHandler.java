@@ -6,6 +6,27 @@ import java.util.*;
 
 public class GraphHandler {
 
+    /**
+     * get edge(u,v) the common neighbors of u and v
+     * @param adjMap
+     * @param edge
+     * @return
+     */
+    public static LinkedList<Integer> getCommonNeighbors(Hashtable<Integer,LinkedList<Integer>> adjMap,Edge edge) {
+        Integer v1 = edge.getV1();
+        Integer v2 = edge.getV2();
+        LinkedList<Integer> set1 = adjMap.get(v1);
+        LinkedList<Integer> set2 = adjMap.get(v2);
+        LinkedList<Integer> setCommon = (LinkedList<Integer>) set1.clone();
+        setCommon.retainAll(set2);
+        return setCommon;
+    }
+
+    /**
+     * clone a adjMap
+     * @param adjMap
+     * @return
+     */
     public static Hashtable<Integer, LinkedList<Integer>> deepCloneAdjMap(Hashtable<Integer, LinkedList<Integer>> adjMap) {
         Hashtable<Integer, LinkedList<Integer>> newAdjMap = new Hashtable<>();
         for (Integer i : adjMap.keySet()) {
@@ -76,7 +97,6 @@ public class GraphHandler {
 
     /**
      * remove a set of edges from adjMap
-     *
      * @param adjMap
      * @param changeEdges
      * @return
@@ -90,6 +110,24 @@ public class GraphHandler {
         return newAdjMap;
     }
 
+    /**
+     * remove a set of edges from a graph
+     * @param graph
+     * @param changedEdges
+     * @return new graph
+     */
+    public static Graph removeEdgesFromGraph(Graph graph, LinkedList<Edge> changedEdges) {
+        LinkedList<Edge> oldEdgeSet = graph.getEdgeSet();
+        Hashtable<Integer, LinkedList<Integer>> oldAdjMap = graph.getAdjMap();
+
+        LinkedList<Edge> newEdgeSet = (LinkedList<Edge>) oldEdgeSet.clone();
+        newEdgeSet.removeAll(changedEdges);
+
+        Hashtable<Integer, LinkedList<Integer>> newAdjMap = deepCloneAdjMap(oldAdjMap);
+        newAdjMap = removeEdgesFromAdjMap(newAdjMap, changedEdges);
+
+        return new Graph(newAdjMap, newEdgeSet);
+    }
 
     /**
      * compute the trussness of e based on the locality property
@@ -102,16 +140,14 @@ public class GraphHandler {
     public static int computeTrussnessLowerBound(Graph graph, Hashtable<Edge, Integer> trussMap, Edge e) {
         Hashtable<Integer, LinkedList<Integer>> adjMap = graph.getAdjMap();
 
-        Integer v1_e0 = e.getV1();
-        Integer v2_e0 = e.getV2();
-        LinkedList<Integer> set01 = adjMap.get(v1_e0);
-        LinkedList<Integer> set02 = adjMap.get(v2_e0);
-        LinkedList<Integer> set0Common = (LinkedList<Integer>) set01.clone();
-        set0Common.retainAll(set02);
+        Integer v1_e = e.getV1();
+        Integer v2_e = e.getV2();
+        LinkedList<Integer> set0Common = getCommonNeighbors(adjMap, e);
+
         ArrayList<Integer> commonTrussList = new ArrayList<>();
         for (int w : set0Common) {
-            Edge e1 = new Edge(v1_e0, w);
-            Edge e2 = new Edge(v2_e0, w);
+            Edge e1 = new Edge(v1_e, w);
+            Edge e2 = new Edge(v2_e, w);
             commonTrussList.add(Math.min(trussMap.get(e1), trussMap.get(e2)));
         }
 
@@ -173,10 +209,7 @@ public class GraphHandler {
         for (Edge e : edgeSet) {
             Integer v1 = e.getV1();
             Integer v2 = e.getV2();
-            LinkedList<Integer> set1 = adjMap.get(v1);
-            LinkedList<Integer> set2 = adjMap.get(v2);
-            LinkedList<Integer> setCommon = (LinkedList<Integer>) set1.clone();
-            setCommon.retainAll(set2);
+            LinkedList<Integer> setCommon = getCommonNeighbors(adjMap, e);
 
             int ss = 0;
             for (int w : setCommon) {
@@ -206,10 +239,7 @@ public class GraphHandler {
         for (Edge e : edgeSet) {
             Integer v1 = e.getV1();
             Integer v2 = e.getV2();
-            LinkedList<Integer> set1 = adjMap.get(v1);
-            LinkedList<Integer> set2 = adjMap.get(v2);
-            LinkedList<Integer> setCommon = (LinkedList<Integer>) set1.clone();
-            setCommon.retainAll(set2);
+            LinkedList<Integer> setCommon = getCommonNeighbors(adjMap, e);
 
             int ps = 0;
             for (int w : setCommon) {

@@ -1,9 +1,7 @@
 package util;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.awt.image.Kernel;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class RandomUtils {
@@ -48,16 +46,55 @@ public class RandomUtils {
         return null;
     }
 
+    /**
+     * random choose k form N
+     * Reservoir sampling
+     * @param list
+     * @param k
+     * @return
+     */
+    public static LinkedList<Integer> getRandomKFormN(LinkedList<Integer> list, int k) {
+        int N = list.size();
+        LinkedList<Integer> kList = new LinkedList<>();
 
-    public static TreeSet<Edge> getRandomSetFromSet(TreeSet<Edge> edgeList, int nums) {
-        TreeSet<Edge> deltaEdges = new TreeSet<>();
-
-
-
-
-
-        return deltaEdges;
+        for (int i = 0; i < k; i++) {
+            kList.add(list.get(i));
+        }
+        for (int i = k; i < N; i++) {
+            int r = getRandomInt(k + 1);
+            if (r < k) {
+                kList.add(r, list.get(i));
+                kList.remove(r + 1);
+            }
+        }
+        return kList;
     }
+
+    /**
+     * random choose a small batch set from a set
+     * If it's more than half, take the other half
+     * @param edgeList
+     * @param nums the size of small batch set
+     * @return
+     */
+    public static LinkedList<Edge> getRandomSetFromSet(LinkedList<Edge> edgeList, int nums) {
+        int N = edgeList.size();
+
+        LinkedList<Edge> dynamicEdges = new LinkedList<>();
+        for (int i = 0; i < nums; i++) {
+            dynamicEdges.add(edgeList.get(i));
+        }
+
+        for (int i = nums; i < N; i++) {
+            int r = getRandomInt(i + 1);
+            if (r < nums) {
+                dynamicEdges.add(r, edgeList.get(i));
+                dynamicEdges.remove(r + 1);
+            }
+        }
+        return dynamicEdges;
+    }
+
 
 }
 

@@ -56,6 +56,7 @@ public class SupTruss {
         LinkedList<Edge> newEdgeSet = ((LinkedList<Edge>) oldEdgeSet.clone());
         newEdgeSet.add(e0);
         Hashtable<Integer, LinkedList<Integer>> newAdjMap = GraphHandler.deepCloneAdjMap(oldAdjMap);
+        newAdjMap = GraphHandler.insertEdgeToAdjMap(newAdjMap, e0);
         Graph newGraph = new Graph(newAdjMap, newEdgeSet);
 
         //compute trussMap from old graph
@@ -83,10 +84,7 @@ public class SupTruss {
         //PES
         Integer v1_e0 = e0.getV1();
         Integer v2_e0 = e0.getV2();
-        LinkedList<Integer> neiList_v1_e0 = newAdjMap.get(v1_e0);
-        LinkedList<Integer> neiList_v2_e0 = newAdjMap.get(v2_e0);
-        LinkedList<Integer> set0Common = (LinkedList<Integer>) neiList_v1_e0.clone();
-        set0Common.retainAll(neiList_v2_e0);
+        LinkedList<Integer> set0Common = GraphHandler.getCommonNeighbors(newAdjMap, e0);
 
         LinkedList<Edge> promoteEdgeSet = new LinkedList<>();
         for (int w : set0Common) {
@@ -124,10 +122,7 @@ public class SupTruss {
                 if (sMap.get(e_stack) > t_root - 2) {
                     int a = e_stack.getV1();
                     int b = e_stack.getV2();
-                    LinkedList<Integer> setA = newAdjMap.get(a);
-                    LinkedList<Integer> setB = newAdjMap.get(b);
-                    LinkedList<Integer> setC = (LinkedList<Integer>) setA.clone();
-                    setC.retainAll(setB);
+                    LinkedList<Integer> setC=GraphHandler.getCommonNeighbors(newAdjMap,e_stack);
 
                     for (int c : setC) {
                         Edge ac = new Edge(a, c);
@@ -195,7 +190,6 @@ public class SupTruss {
     }
 
     /**
-     * TODO:remain
      * one random edge deletion
      *
      * @param graph the object of Graph
@@ -211,6 +205,7 @@ public class SupTruss {
 
     /**
      * one edge deletion
+     *
      * @param graph
      * @param e0
      * @return
@@ -226,62 +221,41 @@ public class SupTruss {
             return null;
         }
 
-        //compute old graph trussness
-        TrussDecomp trussDecomp = new TrussDecomp(graph);
-        Hashtable<Edge, Integer> trussMap = (Hashtable<Edge, Integer>) trussDecomp.run().getOutput();
-
         //Construct new graph
-        TreeSet<Edge> edgeSet = (TreeSet<Edge>) oldEdgeSet.clone();
-        edgeSet.remove(e0);
-        Hashtable<Integer, LinkedList<Integer>> adjMap = GraphHandler.romveEdgeFromAdjMap(oldAdjMap, e0);
+        LinkedList<Edge> newEdgeSet = (LinkedList<Edge>) oldEdgeSet.clone();
+        newEdgeSet.remove(e0);
+        Hashtable<Integer, LinkedList<Integer>> newAdjMap = GraphHandler.deepCloneAdjMap(oldAdjMap);
+        newAdjMap = GraphHandler.romveEdgeFromAdjMap(oldAdjMap, e0);
+        Graph newGraph = new Graph(newAdjMap, newEdgeSet);
 
-        //compute SustainSupport
-        Hashtable<Edge, Integer> sSupMap = new Hashtable<>();
-        for (Edge e : edgeSet) {
-            Integer v1 = e.getV1();
-            Integer v2 = e.getV2();
-            LinkedList<Integer> set1 = adjMap.get(v1);
-            LinkedList<Integer> set2 = adjMap.get(v2);
-            LinkedList<Integer> setCommon = (LinkedList<Integer>) set1.clone();
-            setCommon.retainAll(set2);
+        //compute old graph trussMap
+        Hashtable<Edge, Integer> trussMap = GraphHandler.computeTrussMap(graph);
 
-            int ss = 0;
-            for (int w : setCommon) {
-                Edge e1 = new Edge(v1, w);
-                Edge e2 = new Edge(v2, w);
-                if (trussMap.get(e) <= Math.min(trussMap.get(e1), trussMap.get(e2)))
-                    ss++;
-            }
-            sSupMap.put(e, ss);
-        }
+        //compute sustainSupportMap
+        Hashtable<Edge, Integer> sSupMap = GraphHandler.computeSustainSupportMap(newGraph, trussMap);
+
+        //compute pivotalSupportMap
+        Hashtable<Edge, Integer> pSupMap = GraphHandler.computePivotalSupportMap(newGraph, trussMap, sSupMap);
 
         /**
          * main part
          * one edge insertion update
          */
         long startTime = System.currentTimeMillis();
-
         int t_e0 = trussMap.get(e0);
-        Integer v1 = e0.getV1();
-        Integer v2 = e0.getV2();
-        LinkedList<Integer> set1 = oldAdjMap.get(v1);
-        LinkedList<Integer> set2 = oldAdjMap.get(v2);
-        LinkedList<Integer> setCommon = (LinkedList<Integer>) set1.clone();
-        setCommon.retainAll(set2);
-
-        ArrayList<Integer> commonTrussList = new ArrayList<>();
-        for (int w : setCommon) {
-            Edge e1 = new Edge(v1, w);
-            Edge e2 = new Edge(v2, w);
-            commonTrussList.add(Math.min(trussMap.get(e1), trussMap.get(e2)));
-        }
+        trussMap.remove(e0);
 
         //PES
+        Integer v1_e0 = e0.getV1();
+        Integer v2_e0 = e0.getV2();
+        LinkedList<Integer> neiList_v1_e0 = newAdjMap.get(v1_e0);
+        LinkedList<Integer> neiList_v2_e0 = newAdjMap.get(v2_e0);
+        LinkedList<Integer> set0Common = (LinkedList<Integer>) neiList_v1_e0.clone();
+        set0Common.retainAll(neiList_v2_e0);
         LinkedList<Edge> promoteEdgeSet = new LinkedList<>();
-        for (int w : setCommon) {
-            Edge e1 = new Edge(w, v1);
-            Edge e2 = new Edge(w, v2);
-
+        for (int w : set0Common) {
+            Edge e1 = new Edge(w, v1_e0);
+            Edge e2 = new Edge(w, v2_e0);
             if (trussMap.get(e1) <= t_e0) {
                 promoteEdgeSet.add(e1);
             }
@@ -294,7 +268,7 @@ public class SupTruss {
         Hashtable<Edge, Boolean> edgeVisitedMap = new Hashtable<>();
         Hashtable<Edge, Boolean> edgeElimainateMap = new Hashtable<>();
         Hashtable<Edge, Integer> sMap = new Hashtable<>();
-        for (Edge e : edgeSet) {
+        for (Edge e : newEdgeSet) {
             edgeVisitedMap.put(e, false);
             edgeElimainateMap.put(e, false);
             sMap.put(e, 0);
@@ -310,13 +284,13 @@ public class SupTruss {
             stack.push(e_root);
             while (!stack.empty()) {
                 Edge e_stack = stack.pop();
-                if (sMap.get(e_stack) < t_root - 2) {
-                    eliminate(adjMap, trussMap, sMap, edgeElimainateMap, t_root, e_stack);
+                if (sMap.get(e_stack) < t_root - 2) { //cannot support
+                    eliminate(newAdjMap, trussMap, sMap, edgeElimainateMap, t_root, e_stack);
 
                     Integer a = e_stack.getV1();
                     Integer b = e_stack.getV2();
-                    LinkedList<Integer> setA = adjMap.get(a);
-                    LinkedList<Integer> setB = adjMap.get(b);
+                    LinkedList<Integer> setA = newAdjMap.get(a);
+                    LinkedList<Integer> setB = newAdjMap.get(b);
                     LinkedList<Integer> setC = (LinkedList<Integer>) setA.clone();
                     setC.retainAll(setB);
 
@@ -353,22 +327,19 @@ public class SupTruss {
             }
         }
 
-        Hashtable<Edge, Integer> newTrussMap = (Hashtable<Edge, Integer>) trussMap.clone();
-        newTrussMap.remove(e0);
-        for (Edge e : edgeSet) {
+        for (Edge e : newEdgeSet) {
             if (edgeVisitedMap.get(e) && !edgeElimainateMap.get(e)) {
-                int t = newTrussMap.get(e);
-                newTrussMap.put(e, t - 1);
+                int t = trussMap.get(e);
+                trussMap.put(e, t - 1);
             }
         }
 
         long endTime = System.currentTimeMillis();
-        Result result = new Result(newTrussMap, endTime - startTime, "SupTrussDeleteEdge");
+        Result result = new Result(trussMap, endTime - startTime, "SupTrussDeleteEdge");
 
         LOGGER.info("SupTruss edgeDeleteion is computed");
         return result;
     }
-
 
     /***
      *  eliminate
