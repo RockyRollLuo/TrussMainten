@@ -102,9 +102,34 @@ public class TCPIndex {
         trussMap.put(e0, k1);
         int k_max=k2-1;
 
-        for (int k = 2; k < k2; k++) {
+        Hashtable<Integer, LinkedList<Edge>> Lk = new Hashtable<>();
+
+        Integer u = e0.getV1();
+        Integer v = e0.getV2();
+        LinkedList<Integer> set0Common = GraphHandler.getCommonNeighbors(newAdjMap, e0);
+        for (int w : set0Common) {
+            Edge e_wu = new Edge(u, w);
+            Edge e_wv = new Edge(v, w);
+            int t_wu = trussMap.get(e_wu);
+            int t_wv = trussMap.get(e_wv);
+            int t_min = Math.min(t_wu, t_wv);
+            if ( t_min<= k_max) {
+                if (t_wu==t_min) Lk.get(t_min).add(e_wu);
+                if (t_wv==t_min) Lk.get(t_min).add(e_wv);
+            }
+        }
+
+        Hashtable<Edge, Integer> s = new Hashtable<>();
+        for (int k = k_max; k > 1; k--) {
+            Stack<Edge> Q = new Stack<>();
+            Q.addAll(Lk.get(k));
+            while (!Q.isEmpty()) {
+                Edge e_xy = Q.pop();
+                s.put(e_xy, 0);
 
 
+
+            }
 
         }
 

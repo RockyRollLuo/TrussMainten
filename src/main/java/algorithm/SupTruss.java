@@ -84,10 +84,7 @@ public class SupTruss {
         //PES
         Integer v1_e0 = e0.getV1();
         Integer v2_e0 = e0.getV2();
-        LinkedList<Integer> neiList_v1_e0 = newAdjMap.get(v1_e0);
-        LinkedList<Integer> neiList_v2_e0 = newAdjMap.get(v2_e0);
-        LinkedList<Integer> set0Common = (LinkedList<Integer>) neiList_v1_e0.clone();
-        set0Common.retainAll(neiList_v2_e0);
+        LinkedList<Integer> set0Common = GraphHandler.getCommonNeighbors(newAdjMap, e0);
 
         LinkedList<Edge> promoteEdgeSet = new LinkedList<>();
         for (int w : set0Common) {
@@ -125,10 +122,7 @@ public class SupTruss {
                 if (sMap.get(e_stack) > t_root - 2) {
                     int a = e_stack.getV1();
                     int b = e_stack.getV2();
-                    LinkedList<Integer> setA = newAdjMap.get(a);
-                    LinkedList<Integer> setB = newAdjMap.get(b);
-                    LinkedList<Integer> setC = (LinkedList<Integer>) setA.clone();
-                    setC.retainAll(setB);
+                    LinkedList<Integer> setC=GraphHandler.getCommonNeighbors(newAdjMap,e_stack);
 
                     for (int c : setC) {
                         Edge ac = new Edge(a, c);

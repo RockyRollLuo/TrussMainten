@@ -1,22 +1,22 @@
-2019-11-24 21:42:00 [Thread:main][ Class:util.GraphImport >> Method: util.GraphImport.load(GraphImport.java:31) ]
+2019-11-25 15:03:12 [Thread:main][ Class:util.GraphImport >> Method: util.GraphImport.load(GraphImport.java:31) ]
 INFO:loading graph...: datasets\test6.txt
-2019-11-24 21:42:00 [Thread:main][ Class:util.GraphImport >> Method: util.GraphImport.load(GraphImport.java:75) ]
+2019-11-25 15:03:12 [Thread:main][ Class:util.GraphImport >> Method: util.GraphImport.load(GraphImport.java:75) ]
 INFO:graph was loaded: datasets\test6.txt
-2019-11-24 21:42:00 [Thread:main][ Class:algorithm.SupTruss >> Method: algorithm.SupTruss.edgeInsertion(SupTruss.java:45) ]
+2019-11-25 15:03:12 [Thread:main][ Class:algorithm.SupTruss >> Method: algorithm.SupTruss.edgeInsertion(SupTruss.java:45) ]
 INFO:Initial SupTruss Insertion one edge(4,5)
-2019-11-24 21:42:00 [Thread:main][ Class:algorithm.TrussDecomp >> Method: algorithm.TrussDecomp.run(TrussDecomp.java:26) ]
+2019-11-25 15:03:12 [Thread:main][ Class:algorithm.TrussDecomp >> Method: algorithm.TrussDecomp.run(TrussDecomp.java:26) ]
 INFO:computing truss decomposition...
-2019-11-24 21:42:00 [Thread:main][ Class:algorithm.TrussDecomp >> Method: algorithm.TrussDecomp.run(TrussDecomp.java:57) ]
-INFO:Progress:0/11
-2019-11-24 21:42:00 [Thread:main][ Class:algorithm.TrussDecomp >> Method: algorithm.TrussDecomp.run(TrussDecomp.java:57) ]
-INFO:Progress:0/11
-2019-11-24 21:42:00 [Thread:main][ Class:algorithm.TrussDecomp >> Method: algorithm.TrussDecomp.run(TrussDecomp.java:57) ]
-INFO:Progress:11/11
-2019-11-24 21:42:00 [Thread:main][ Class:algorithm.SupTruss >> Method: algorithm.SupTruss.edgeInsertion(SupTruss.java:80) ]
+2019-11-25 15:03:12 [Thread:main][ Class:algorithm.TrussDecomp >> Method: algorithm.TrussDecomp.run(TrussDecomp.java:57) ]
+INFO:Progress:0/10
+2019-11-25 15:03:12 [Thread:main][ Class:algorithm.TrussDecomp >> Method: algorithm.TrussDecomp.run(TrussDecomp.java:57) ]
+INFO:Progress:0/10
+2019-11-25 15:03:12 [Thread:main][ Class:algorithm.TrussDecomp >> Method: algorithm.TrussDecomp.run(TrussDecomp.java:57) ]
+INFO:Progress:10/10
+2019-11-25 15:03:12 [Thread:main][ Class:algorithm.SupTruss >> Method: algorithm.SupTruss.edgeInsertion(SupTruss.java:81) ]
 INFO:Start SupTruss Insertion one edge(4,5)
-2019-11-24 21:42:00 [Thread:main][ Class:algorithm.SupTruss >> Method: algorithm.SupTruss.edgeInsertion(SupTruss.java:180) ]
+2019-11-25 15:03:12 [Thread:main][ Class:algorithm.SupTruss >> Method: algorithm.SupTruss.edgeInsertion(SupTruss.java:181) ]
 INFO:Truss decomposition is computed
-2019-11-24 21:42:00 [Thread:main][ Class:util.Export >> Method: util.Export.writeFile(Export.java:31) ]
+2019-11-25 15:03:12 [Thread:main][ Class:util.Export >> Method: util.Export.writeFile(Export.java:31) ]
 INFO:Exporting graph... 
-2019-11-24 21:42:00 [Thread:main][ Class:util.Export >> Method: util.Export.writeFile(Export.java:44) ]
+2019-11-25 15:03:12 [Thread:main][ Class:util.Export >> Method: util.Export.writeFile(Export.java:44) ]
 INFO:Graph was exported.: outputs\SupTrussInsertEdge_test6.txt
