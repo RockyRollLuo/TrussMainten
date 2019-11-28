@@ -186,7 +186,7 @@ public class SetOpt {
     }
 
     /**
-     * Optionアノテーションが付与されたフィールドの一覧を表示する．
+     * Option
      */
     public static void showUsage(Object obj) {
         try {

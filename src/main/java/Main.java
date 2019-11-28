@@ -4,19 +4,30 @@ import util.*;
 import util.SetOpt.Option;
 
 import java.io.IOException;
+import java.util.Hashtable;
+import java.util.LinkedList;
 
 public class Main {
 //    @Option(abbr = 'a', usage = "0:trussDecomp, 1:TCP-Index, 2:OneEdgeTrussDecomp, 3:MultipleEdges, 4:MultipleVertices")
 //    public static int algorithm = 0;
 
-    @Option(abbr = 'p', usage = "Print the result.")
+    @Option(abbr = 'r', usage = "Print the result.")
     public static boolean printResult = true;
 
-    @Option(abbr = 'd', usage = "print the progress")
+    @Option(abbr = 'p', usage = "print the progress")
     public static int debug = 1;
 
     @Option(abbr = 's', usage = "sperate delimiter,0:tab,1:space,2:comma")
     public static String delim = "\t";
+
+    @Option(abbr = 'o', usage = "orders of magnitude,number=2^o,o=0,1,2,3,4,5,6")
+    public static int order = 0;
+
+    @Option(abbr = 'd', usage = "dynamic insertion or deletion, insert:insertion, delete:deletion")
+    public static String d = "insert";
+
+    @Option(abbr = 'e', usage = "execution, sequ:sequential, para:parallel")
+    public static String e = "sequ";
 
 
     public static void main(String[] args) throws IOException {
@@ -26,24 +37,59 @@ public class Main {
 
         //read graph
         String datasetName = args[0];
-        Graph graph = GraphImport.load(datasetName, delim, debug);
+        Graph dataSet = GraphImport.load(datasetName, delim, debug);
 
-        //supTruss
-        SupTruss supTruss = new SupTruss(graph);
-        Edge edge = new Edge(4, 5);
-        Result result = supTruss.edgeInsertion(graph, edge);
-        result.setDatasetName(datasetName);
+        //dynamic edges 2^d
+        LinkedList<Edge> dynamicEdges = RandomUtils.getRandomSetFromSet(dataSet.getEdgeSet(), (int) Math.pow(2, order));
 
-        //trussDecomp
-//        TrussDecomp trussDecomp = new TrussDecomp(graph);
-//        Result result = trussDecomp.run();
-//        result.setDatasetName(datasetName);
+        //Graph
+        LinkedList<Edge> edgeSet = (LinkedList<Edge>) dataSet.getEdgeSet().clone();
+        Hashtable<Integer, LinkedList<Integer>> adjMap = GraphHandler.deepCloneAdjMap(dataSet.getAdjMap());
+        edgeSet.removeAll(dynamicEdges);
+        adjMap = GraphHandler.removeEdgesFromAdjMap(adjMap, dynamicEdges);
+        Graph graph = new Graph(adjMap, edgeSet);
 
-        //print result
-        if (printResult) {
-            Export.writeFile(result, debug);
+
+        SupTruss supTruss = new SupTruss();
+
+        /**
+         * INSERTION: graph->dataSet
+         */
+        if (d.equals("insert")) {
+            //trussDecomp ture
+            Result result = new TrussDecomp(dataSet).run();
+            result.setDatasetName(datasetName);
+
+            //tds
+            Result result1 = supTruss.edgeTDSInsertion(graph, dynamicEdges);
+            result1.setDatasetName(datasetName);
+
+
+            //print result
+            if (printResult) {
+                Export.writeFile(result, debug);
+                Export.writeFile(result1, debug);
+            }
+
+            /**
+             * DELETION: dataSet->graph
+             */
+        } else if (d.equals("delete")) {
+            //trussDecomp ture
+            Result result = new TrussDecomp(graph).run();
+            result.setDatasetName(datasetName);
+
+
+            //SupTruss
+            Result result1 = supTruss.edgeTDSDeletion(graph, dynamicEdges);
+            result1.setDatasetName(datasetName);
+
+            //print result
+            if (printResult) {
+                Export.writeFile(result, debug);
+                Export.writeFile(result1, debug);
+            }
         }
-
     }
 
 }

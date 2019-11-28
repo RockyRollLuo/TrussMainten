@@ -7,12 +7,52 @@ import java.util.*;
 public class GraphHandler {
 
     /**
+     * whether two lists have common elements
+     * true:have common elements
+     * false: don't have common elements
+     * @param list1
+     * @param list2
+     * @return
+     */
+    public static boolean haveCommonElement(LinkedList<Edge> list1, LinkedList<Edge> list2) {
+        for (Edge e1 : list1) {
+            for (Edge e2 : list2) {
+                if (e1.equals(e2)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    /**
+     * get a edge set that all edges can form triangle with given edge
+     *
+     * @param edge
+     * @return
+     */
+    public static LinkedList<Edge> getTriangleEdges(Hashtable<Integer, LinkedList<Integer>> adjMap, Edge edge) {
+        LinkedList<Edge> triangleEdgeSet = new LinkedList<>();
+
+        Integer a = edge.getV1();
+        Integer b = edge.getV2();
+        LinkedList<Integer> cSet = getCommonNeighbors(adjMap, edge);
+        for (Integer c : cSet) {
+            triangleEdgeSet.add(new Edge(a, c));
+            triangleEdgeSet.add(new Edge(b, c));
+        }
+        return triangleEdgeSet;
+    }
+
+    /**
      * get edge(u,v) the common neighbors of u and v
+     *
      * @param adjMap
      * @param edge
      * @return
      */
-    public static LinkedList<Integer> getCommonNeighbors(Hashtable<Integer,LinkedList<Integer>> adjMap,Edge edge) {
+    public static LinkedList<Integer> getCommonNeighbors(Hashtable<Integer, LinkedList<Integer>> adjMap, Edge edge) {
         Integer v1 = edge.getV1();
         Integer v2 = edge.getV2();
         LinkedList<Integer> set1 = adjMap.get(v1);
@@ -24,6 +64,7 @@ public class GraphHandler {
 
     /**
      * clone a adjMap
+     *
      * @param adjMap
      * @return
      */
@@ -32,34 +73,6 @@ public class GraphHandler {
         for (Integer i : adjMap.keySet()) {
             LinkedList<Integer> adjList = adjMap.get(i);
             newAdjMap.put(i, (LinkedList<Integer>) adjList.clone());
-        }
-        return newAdjMap;
-    }
-
-    /**
-     * remove one edge from adjMap
-     *
-     * @param adjMap original adjMap
-     * @param e      removed edge
-     * @return new adjMap
-     */
-    public static Hashtable<Integer, LinkedList<Integer>> romveEdgeFromAdjMap(Hashtable<Integer, LinkedList<Integer>> adjMap, Edge e) {
-        Hashtable<Integer, LinkedList<Integer>> newAdjMap = (Hashtable<Integer, LinkedList<Integer>>) adjMap.clone();
-        Integer v1 = e.getV1();
-        Integer v2 = e.getV2();
-
-        Set<Integer> keySet = newAdjMap.keySet();
-        if (keySet.contains(v1)) {
-            newAdjMap.get(v1).remove(v2);
-//            if (newAdjMap.get(v1).size() == 0) {
-//                newAdjMap.remove(v1);
-//            }
-        }
-        if (keySet.contains(v2)) {
-            newAdjMap.get(v2).remove(v1);
-//            if (newAdjMap.get(v2).size() == 0) {
-//                newAdjMap.remove(v2);
-//            }
         }
         return newAdjMap;
     }
@@ -94,9 +107,44 @@ public class GraphHandler {
         return newAdjMap;
     }
 
+    public static Hashtable<Integer, LinkedList<Integer>> insertEdgesToAdjMap(Hashtable<Integer, LinkedList<Integer>> adjMap, LinkedList<Edge> edges) {
+
+        Hashtable<Integer, LinkedList<Integer>> newAdjMap = (Hashtable<Integer, LinkedList<Integer>>) adjMap.clone();
+
+        //TODO:add edges to adjMap
+        return newAdjMap;
+    }
+
+    /**
+     * remove one edge from adjMap
+     * @param adjMap original adjMap
+     * @param e      removed edge
+     * @return new adjMap
+     */
+    public static Hashtable<Integer, LinkedList<Integer>> romveEdgeFromAdjMap(Hashtable<Integer, LinkedList<Integer>> adjMap, Edge e) {
+        Hashtable<Integer, LinkedList<Integer>> newAdjMap = (Hashtable<Integer, LinkedList<Integer>>) adjMap.clone();
+        Integer v1 = e.getV1();
+        Integer v2 = e.getV2();
+
+        Set<Integer> keySet = newAdjMap.keySet();
+        if (keySet.contains(v1)) {
+            newAdjMap.get(v1).remove(v2);
+//            if (newAdjMap.get(v1).size() == 0) {
+//                newAdjMap.remove(v1);
+//            }
+        }
+        if (keySet.contains(v2)) {
+            newAdjMap.get(v2).remove(v1);
+//            if (newAdjMap.get(v2).size() == 0) {
+//                newAdjMap.remove(v2);
+//            }
+        }
+        return newAdjMap;
+    }
 
     /**
      * remove a set of edges from adjMap
+     *
      * @param adjMap
      * @param changeEdges
      * @return
@@ -112,6 +160,7 @@ public class GraphHandler {
 
     /**
      * remove a set of edges from a graph
+     *
      * @param graph
      * @param changedEdges
      * @return new graph
@@ -259,6 +308,40 @@ public class GraphHandler {
             pSupMap.put(e, ps);
         }
         return pSupMap;
+    }
+
+    /**
+     * given a graph, and a set of edges not in graph, compute a tds
+     *
+     * @param graph
+     * @param addEdges
+     * @return
+     */
+    public LinkedList<Edge> getTDS(Graph graph, LinkedList<Edge> addEdges) {
+        LinkedList<Edge> tds = new LinkedList<>();
+
+        Hashtable<Integer, LinkedList<Integer>> adjMap = graph.getAdjMap();
+        LinkedList<Edge> edgeSet = graph.getEdgeSet();
+
+        Edge firstEdge = addEdges.poll();
+        tds.add(firstEdge);
+
+        for (Edge e_new : addEdges) {
+            adjMap = GraphHandler.insertEdgeToAdjMap(adjMap, e_new);
+            LinkedList<Edge> e_new_triangleEdgeSet = getTriangleEdges(adjMap, e_new);
+
+            for (Edge e_tds : tds) {
+                LinkedList<Edge> e_tds_triangleEdgeSet = getTriangleEdges(adjMap, e_tds);
+
+                if (haveCommonElement(e_new_triangleEdgeSet, e_tds_triangleEdgeSet)) {
+                    adjMap = GraphHandler.romveEdgeFromAdjMap(adjMap, e_new);
+                } else {
+                    tds.add(e_new);
+                }
+            }
+        }
+        edgeSet.addAll(tds);
+        return tds;
     }
 
 }
