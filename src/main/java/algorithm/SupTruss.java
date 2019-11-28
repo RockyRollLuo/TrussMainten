@@ -8,12 +8,6 @@ import java.util.*;
 public class SupTruss {
     private static Logger LOGGER = Logger.getLogger(SupTruss.class);
 
-    private Graph graph;
-
-    public SupTruss(Graph graph) {
-        this.graph = graph;
-    }
-
     /**
      * one random edge insertion
      *
@@ -179,11 +173,32 @@ public class SupTruss {
     /***
      * edges insertion
      * @param graph
-     * @param TDS
+     * @param tds
      * @return
      */
-    public Result edgesInsertion(Graph graph, TreeSet<Edge> TDS) {
-        //TODO
+    public Result edgeTDSInsertion(Graph graph, LinkedList<Edge> tds) {
+        LOGGER.info("Initial SupTruss Inserte  TDS:" + tds.toString());
+
+        Hashtable<Integer, LinkedList<Integer>> oldAdjMap = graph.getAdjMap();
+        LinkedList<Edge> oldEdgeSet = graph.getEdgeSet();
+
+        //new Graph
+        LinkedList<Edge> newEdgeSet = ((LinkedList<Edge>) oldEdgeSet.clone());
+        newEdgeSet.addAll(tds);
+        Hashtable<Integer, LinkedList<Integer>> newAdjMap = GraphHandler.deepCloneAdjMap(oldAdjMap);
+        newAdjMap = GraphHandler.insertEdgesToAdjMap(newAdjMap, tds);
+
+
+
+
+
+
+        //TODO:
+
+
+
+
+        Graph newGraph = new Graph(newAdjMap, newEdgeSet);
 
 
         return null;
@@ -340,6 +355,33 @@ public class SupTruss {
         LOGGER.info("SupTruss edgeDeleteion is computed");
         return result;
     }
+
+
+    public Result edgeTDSDeletion(Graph graph, LinkedList<Edge> tds) {
+        LOGGER.info("SupTruss deletion tds:" + tds.toString());
+
+        Hashtable<Integer, LinkedList<Integer>> oldAdjMap = graph.getAdjMap();
+        LinkedList<Edge> oldEdgeSet = graph.getEdgeSet();
+
+        //todo:
+        Hashtable<Edge, Integer> trussMap = GraphHandler.computeTrussMap(graph);
+
+        /**
+         * main part
+         * one edge insertion update
+         */
+        long startTime = System.currentTimeMillis();
+
+
+
+
+        long endTime = System.currentTimeMillis();
+        Result result = new Result(trussMap, endTime - startTime, "SupTrussDeleteEdge");
+
+        LOGGER.info("SupTruss edgeDeleteion is computed");
+        return result;
+    }
+
 
     /***
      *  eliminate
