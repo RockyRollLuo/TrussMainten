@@ -14,7 +14,7 @@ public class SupTruss {
      * @param graph the object of Graph
      * @return
      */
-    public Result edgeInsertion(Graph graph) {
+    public static Result edgeInsertion(Graph graph) {
         Hashtable<Integer, LinkedList<Integer>> oldAdjMap = graph.getAdjMap();
         LinkedList<Edge> oldEdgeSet = graph.getEdgeSet();
 
@@ -35,7 +35,7 @@ public class SupTruss {
      * @param e0
      * @return
      */
-    public Result edgeInsertion(Graph graph, Edge e0) {
+    public static Result edgeInsertion(Graph graph, Edge e0) {
         LOGGER.info("Initial SupTruss Insertion one edge" + e0.toString());
 
         Hashtable<Integer, LinkedList<Integer>> oldAdjMap = graph.getAdjMap();
@@ -176,7 +176,7 @@ public class SupTruss {
      * @param tds
      * @return
      */
-    public Result edgeTDSInsertion(Graph graph, LinkedList<Edge> tds) {
+    public static Result edgeTDSInsertion(Graph graph, LinkedList<Edge> tds) {
         LOGGER.info("Initial SupTruss Inserte  TDS:" + tds.toString());
 
         Hashtable<Integer, LinkedList<Integer>> oldAdjMap = graph.getAdjMap();
@@ -210,7 +210,7 @@ public class SupTruss {
      * @param graph the object of Graph
      * @return
      */
-    public Result edgeDeletion(Graph graph) {
+    public static Result edgeDeletion(Graph graph) {
         LinkedList<Edge> edgeSet = graph.getEdgeSet();
 
         Edge e0 = RandomUtils.getRandomElement(edgeSet);
@@ -225,7 +225,7 @@ public class SupTruss {
      * @param e0
      * @return
      */
-    public Result edgeDeletion(Graph graph, Edge e0) {
+    public static Result edgeDeletion(Graph graph, Edge e0) {
         LOGGER.info("SupTruss deletion one edge:" + e0.toString());
 
         Hashtable<Integer, LinkedList<Integer>> oldAdjMap = graph.getAdjMap();
@@ -357,7 +357,7 @@ public class SupTruss {
     }
 
 
-    public Result edgeTDSDeletion(Graph graph, LinkedList<Edge> tds) {
+    public static Result edgeTDSDeletion(Graph graph, LinkedList<Edge> tds) {
         LOGGER.info("SupTruss deletion tds:" + tds.toString());
 
         Hashtable<Integer, LinkedList<Integer>> oldAdjMap = graph.getAdjMap();
@@ -393,7 +393,7 @@ public class SupTruss {
      * @param t_root
      * @param edge
      */
-    private void eliminate(Hashtable<Integer, LinkedList<Integer>> adjMap, Hashtable<Edge, Integer> trussMap, Hashtable<Edge, Integer> sMap, Hashtable<Edge, Boolean> edgeElimanateMap, int t_root, Edge edge) {
+    private static void eliminate(Hashtable<Integer, LinkedList<Integer>> adjMap, Hashtable<Edge, Integer> trussMap, Hashtable<Edge, Integer> sMap, Hashtable<Edge, Boolean> edgeElimanateMap, int t_root, Edge edge) {
         edgeElimanateMap.put(edge, Boolean.TRUE);
         Integer a = edge.getV1();
         Integer b = edge.getV2();

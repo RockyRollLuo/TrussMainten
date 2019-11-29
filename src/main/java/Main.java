@@ -1,11 +1,14 @@
 import algorithm.SupTruss;
 import algorithm.TrussDecomp;
+import algorithm.parallel.Parallel;
+import algorithm.parallel.SupTrussInsertion;
 import util.*;
 import util.SetOpt.Option;
 
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.LinkedList;
+import java.util.concurrent.ExecutorService;
 
 public class Main {
 //    @Option(abbr = 'a', usage = "0:trussDecomp, 1:TCP-Index, 2:OneEdgeTrussDecomp, 3:MultipleEdges, 4:MultipleVertices")
@@ -24,7 +27,7 @@ public class Main {
     public static int order = 0;
 
     @Option(abbr = 'd', usage = "dynamic insertion or deletion, insert:insertion, delete:deletion")
-    public static String d = "insert";
+    public static String d = "insert1";
 
     @Option(abbr = 'e', usage = "execution, sequ:sequential, para:parallel")
     public static String e = "sequ";
@@ -50,7 +53,9 @@ public class Main {
         Graph graph = new Graph(adjMap, edgeSet);
 
 
-        SupTruss supTruss = new SupTruss();
+
+
+
 
         /**
          * INSERTION: graph->dataSet
@@ -61,7 +66,7 @@ public class Main {
             result.setDatasetName(datasetName);
 
             //tds
-            Result result1 = supTruss.edgeTDSInsertion(graph, dynamicEdges);
+            Result result1 = SupTruss.edgeTDSInsertion(graph, dynamicEdges);
             result1.setDatasetName(datasetName);
 
 
@@ -81,7 +86,7 @@ public class Main {
 
 
             //SupTruss
-            Result result1 = supTruss.edgeTDSDeletion(graph, dynamicEdges);
+            Result result1 = SupTruss.edgeTDSDeletion(graph, dynamicEdges);
             result1.setDatasetName(datasetName);
 
             //print result
