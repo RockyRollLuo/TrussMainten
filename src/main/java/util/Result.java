@@ -2,20 +2,24 @@ package util;
 
 
 public class Result {
+    private Graph graph;
     private Object output;
     private long takenTime;
+    private int times;
     private String algorithmName;
     private String datasetName;
 
     public Result(Object output, long takenTime) {
         this.output = output;
         this.takenTime = takenTime;
+        this.times = 1;
     }
 
     public Result(Object output, long takenTime, String algorithmName) {
         this.output = output;
         this.takenTime = takenTime;
         this.algorithmName = algorithmName;
+        this.times = 1;
     }
 
     public Result(Object output, long takenTime, String algorithmName, String datasetName) {
@@ -23,11 +27,41 @@ public class Result {
         this.takenTime = takenTime;
         this.algorithmName = algorithmName;
         this.datasetName = datasetName;
+        this.times = 1;
     }
+
+    public Result(Graph graph, Object output, long takenTime, String algorithmName, String datasetName) {
+        this.graph = graph;
+        this.output = output;
+        this.takenTime = takenTime;
+        this.algorithmName = algorithmName;
+        this.datasetName = datasetName;
+        this.times = 1;
+    }
+
+
 
     /**
      * Getter() and Setter()
      */
+
+    public int getTimes() {
+        return times;
+    }
+
+    public void setTimes(int times) {
+        this.times = times;
+    }
+
+
+    public Graph getGraph() {
+        return graph;
+    }
+
+    public void setGraph(Graph graph) {
+        this.graph = graph;
+    }
+
     public Object getOutput() {
         return output;
     }

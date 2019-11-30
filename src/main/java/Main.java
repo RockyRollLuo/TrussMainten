@@ -63,7 +63,7 @@ public class Main {
             result.setDatasetName(datasetName);
 
             //tds
-            Result result1 = SupTruss.edgeTDSInsertion(graph, dynamicEdges);
+            Result result1 = SupTruss.edgesInsertion(graph, dynamicEdges);
             result1.setDatasetName(datasetName);
 
 
@@ -83,7 +83,7 @@ public class Main {
 
 
             //SupTruss
-            Result result1 = SupTruss.edgeTDSDeletion(graph, dynamicEdges);
+            Result result1 = SupTruss.edgesDeletion(graph, dynamicEdges);
             result1.setDatasetName(datasetName);
 
             //print result

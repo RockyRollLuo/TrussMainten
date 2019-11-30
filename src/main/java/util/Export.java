@@ -24,6 +24,7 @@ public class Export {
         Hashtable<Object, Integer> output = (Hashtable<Object, Integer>) result.getOutput();
         String algorithmName = result.getAlgorithmName();
         String datasetName = result.getDatasetName();
+        int times = result.getTimes();
 
         String fileName="outputs\\"+algorithmName+"_"+datasetName;
 
@@ -34,6 +35,9 @@ public class Export {
         BufferedWriter bw = new BufferedWriter(new FileWriter(fileName));
         bw.write("takenTime:"+takenTime+"ms");
         bw.newLine();
+        bw.write("times:"+times);
+        bw.newLine();
+
         for (Object key : output.keySet()) {
             bw.write(key.toString() + "\t" + output.get(key));
             bw.newLine();

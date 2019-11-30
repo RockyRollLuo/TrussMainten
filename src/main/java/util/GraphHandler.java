@@ -10,6 +10,7 @@ public class GraphHandler {
      * whether two lists have common elements
      * true:have common elements
      * false: don't have common elements
+     *
      * @param list1
      * @param list2
      * @return
@@ -107,16 +108,24 @@ public class GraphHandler {
         return newAdjMap;
     }
 
+    /**
+     * inserted a set of edges to adjMap
+     *
+     * @param adjMap
+     * @param edges
+     * @return
+     */
     public static Hashtable<Integer, LinkedList<Integer>> insertEdgesToAdjMap(Hashtable<Integer, LinkedList<Integer>> adjMap, LinkedList<Edge> edges) {
-
         Hashtable<Integer, LinkedList<Integer>> newAdjMap = (Hashtable<Integer, LinkedList<Integer>>) adjMap.clone();
-
-        //TODO:add edges to adjMap
+        for (Edge e : edges) {
+            newAdjMap = insertEdgeToAdjMap(newAdjMap, e);
+        }
         return newAdjMap;
     }
 
     /**
      * remove one edge from adjMap
+     *
      * @param adjMap original adjMap
      * @param e      removed edge
      * @return new adjMap
@@ -317,7 +326,7 @@ public class GraphHandler {
      * @param addEdges
      * @return
      */
-    public LinkedList<Edge> getTDS(Graph graph, LinkedList<Edge> addEdges) {
+    public static LinkedList<Edge> getInsertionTDS(Graph graph, LinkedList<Edge> addEdges) {
         LinkedList<Edge> tds = new LinkedList<>();
 
         Hashtable<Integer, LinkedList<Integer>> adjMap = graph.getAdjMap();
@@ -333,15 +342,50 @@ public class GraphHandler {
             for (Edge e_tds : tds) {
                 LinkedList<Edge> e_tds_triangleEdgeSet = getTriangleEdges(adjMap, e_tds);
 
-                if (haveCommonElement(e_new_triangleEdgeSet, e_tds_triangleEdgeSet)) {
-                    adjMap = GraphHandler.romveEdgeFromAdjMap(adjMap, e_new);
+                if (!haveCommonElement(e_new_triangleEdgeSet, e_tds_triangleEdgeSet)) {
+                    tds.offer(e_new);
                 } else {
-                    tds.add(e_new);
+                    adjMap = GraphHandler.romveEdgeFromAdjMap(adjMap, e_new); //insert first to judge, if not than remove
                 }
             }
         }
         edgeSet.addAll(tds);
+        addEdges.removeAll(tds);
         return tds;
     }
+
+
+    /**
+     * given a graph, and a set of edges in graph, compute a tds
+     * @param graph
+     * @param removeEdges
+     * @return
+     */
+    public static LinkedList<Edge> getDeletionTDS(Graph graph, LinkedList<Edge> removeEdges) {
+        LinkedList<Edge> tds = new LinkedList<>();
+
+        Hashtable<Integer, LinkedList<Integer>> adjMap = graph.getAdjMap();
+        LinkedList<Edge> edgeSet = graph.getEdgeSet();
+
+        Edge firstEdge = removeEdges.poll();
+        tds.add(firstEdge);
+
+        for (Edge e_new : removeEdges) {
+            LinkedList<Edge> e_new_triangleEdgeSet = getTriangleEdges(adjMap, e_new);
+
+            for (Edge e_tds : tds) {
+                LinkedList<Edge> e_tds_triangleEdgeSet = getTriangleEdges(adjMap, e_tds);
+
+                if (!haveCommonElement(e_new_triangleEdgeSet, e_tds_triangleEdgeSet)) {
+                    tds.offer(e_new);
+                }
+            }
+        }
+
+        edgeSet.addAll(tds);
+        removeEdges.removeAll(tds);
+        return tds;
+    }
+
 
 }
