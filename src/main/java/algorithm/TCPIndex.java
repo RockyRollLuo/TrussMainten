@@ -9,7 +9,7 @@ import java.util.*;
 
 public class TCPIndex {
 
-    private int computeTrussnessLowerBound(Graph graph, Hashtable<Edge, Integer> trussMap, Edge e) {
+    private static int computeTrussnessLowerBound(Graph graph, Hashtable<Edge, Integer> trussMap, Edge e) {
         Hashtable<Integer, LinkedList<Integer>> adjMap = graph.getAdjMap();
 
         Integer v1_e0 = e.getV1();
@@ -41,7 +41,7 @@ public class TCPIndex {
         return key_truss - 1;
     }
 
-    private int computeTrussnessUpperBound(Graph graph, Hashtable<Edge, Integer> trussMap, Edge e) {
+    private static int computeTrussnessUpperBound(Graph graph, Hashtable<Edge, Integer> trussMap, Edge e) {
         Hashtable<Integer, LinkedList<Integer>> adjMap = graph.getAdjMap();
 
         Integer v1_e0 = e.getV1();
@@ -75,12 +75,24 @@ public class TCPIndex {
 
 
     /**
+     * a list of edges insertion
+     * @param graph
+     * @param dynamicEdges
+     * @return
+     */
+    public static Result edgesInsertion(Graph graph, LinkedList<Edge> dynamicEdges) {
+        //todo
+
+        return null;
+    }
+
+
+    /**
      * compute the trussness of vertices in the given graph
-     *
      * @param graph input graph
      * @return trussness of edges
      */
-    public Result run(Graph graph, Edge e0) {
+    public static Result edgeInsertionRun(Graph graph, Edge e0) {
         System.err.println("computing TCPIndex decomposition...");
 
         long startTime = System.currentTimeMillis();
@@ -183,4 +195,126 @@ public class TCPIndex {
         return new Result(trussMap, endTime - startTime, "TCPIndex");
     }
 
+
+    /**
+     * a list of edges deletion
+     * @param graph
+     * @param dynamicEdges
+     * @return
+     */
+    public static Result edgesDeletion(Graph graph, LinkedList<Edge> dynamicEdges) {
+        //todo
+
+        return null;
+    }
+
+
+    /**
+     * one edge deletion
+     * @param graph
+     * @param e0
+     * @return
+     */
+    public static Result edgeDeletionRun(Graph graph, Edge e0) {
+        System.err.println("computing TCPIndex decomposition...");
+
+        long startTime = System.currentTimeMillis();
+
+        Hashtable<Integer, LinkedList<Integer>> oldAdjMap = graph.getAdjMap();
+        LinkedList<Edge> oldEdgeSet = graph.getEdgeSet();
+
+        LinkedList<Edge> newEdgeSet = ((LinkedList<Edge>) oldEdgeSet.clone());
+        newEdgeSet.add(e0);
+        Hashtable<Integer, LinkedList<Integer>> newAdjMap = GraphHandler.deepCloneAdjMap(oldAdjMap);
+        newAdjMap = GraphHandler.insertEdgeToAdjMap(newAdjMap, e0);
+        Graph newGraph = new Graph(newAdjMap, newEdgeSet);
+
+        //compute trussMap from old graph
+        Hashtable<Edge, Integer> trussMap = GraphHandler.computeTrussMap(graph);
+
+        int k1 = computeTrussnessLowerBound(newGraph, trussMap, e0);
+        int k2 = computeTrussnessUpperBound(newGraph, trussMap, e0);
+        trussMap.put(e0, k1);
+        int k_max = k2 - 1;
+
+        Hashtable<Integer, LinkedList<Edge>> LkMap = new Hashtable<>();
+
+        Integer u = e0.getV1();
+        Integer v = e0.getV2();
+        LinkedList<Integer> set0Common = GraphHandler.getCommonNeighbors(newAdjMap, e0);
+        for (int w : set0Common) {
+            Edge e_wu = new Edge(u, w);
+            Edge e_wv = new Edge(v, w);
+            int t_wu = trussMap.get(e_wu);
+            int t_wv = trussMap.get(e_wv);
+            int t_min = Math.min(t_wu, t_wv);
+            LinkedList<Edge> Lk = LkMap.get(t_min);
+            if (t_min <= k_max) {
+                if (t_wu == t_min) Lk.add(e_wu);
+                if (t_wv == t_min) Lk.add(e_wv);
+            }
+        }
+
+        Hashtable<Edge, Integer> s = new Hashtable<>();
+        for (int k = k_max; k > 1; k--) {
+            LinkedList<Edge> Lk = LkMap.get(k);
+
+            Stack<Edge> Q = new Stack<>();
+            Q.addAll(Lk);
+            while (!Q.isEmpty()) {
+                Edge e_xy = Q.pop();
+                s.put(e_xy, 0);
+                Integer x = e_xy.getV1();
+                Integer y = e_xy.getV2();
+                LinkedList<Integer> setZ = GraphHandler.getCommonNeighbors(newAdjMap, e_xy);
+                for (Integer z : setZ) {
+                    Edge e_zx = new Edge(z, x);
+                    Edge e_zy = new Edge(z, y);
+                    int t_zx = trussMap.get(e_zx);
+                    int t_zy = trussMap.get(e_zy);
+                    if (t_zx < k || t_zy < k) continue;
+                    int s_xy = s.get(e_xy);
+                    s.put(e_xy, s_xy + 1);
+                    if (t_zx == k && !Lk.contains(e_zx)) Q.push(e_zx);
+                    if (t_zy == k && !Lk.contains(e_zy)) Q.push(e_zy);
+                }
+            }
+
+            for (Edge e_xy : Lk) {
+                if (s.get(e_xy) < k - 2) {
+                    Lk.remove(e_xy);
+                    Integer x = e_xy.getV1();
+                    Integer y = e_xy.getV2();
+                    LinkedList<Integer> setZ = GraphHandler.getCommonNeighbors(newAdjMap, e_xy);
+                    for (Integer z : setZ) {
+                        Edge e_zx = new Edge(z, x);
+                        Edge e_zy = new Edge(z, y);
+                        int t_zx = trussMap.get(e_zx);
+                        int t_zy = trussMap.get(e_zy);
+
+                        if (t_zx < k || t_zy < k) continue;
+                        if (t_zx == k && !Lk.contains(e_zx)) continue;
+                        if (t_zy == k && !Lk.contains(e_zy)) continue;
+                        if (Lk.contains(e_zx)) {
+                            int s_zx = s.get(e_zx);
+                            s.put(e_zx, s_zx - 1);
+                        }
+                        if (Lk.contains(e_zy)) {
+                            int s_zy = s.get(e_zy);
+                            s.put(e_zy, s_zy - 1);
+                        }
+                    }
+                }
+            }
+
+            for (Edge e_xy : Lk) {
+                int t_xy = trussMap.get(e_xy);
+                trussMap.put(e_xy, t_xy + 1);
+            }
+        }
+
+        System.err.println("Truss decomposition is computed...");
+        long endTime = System.currentTimeMillis();
+        return new Result(trussMap, endTime - startTime, "TCPIndex");
+    }
 }

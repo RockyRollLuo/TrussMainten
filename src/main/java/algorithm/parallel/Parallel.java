@@ -2,6 +2,7 @@ package algorithm.parallel;
 
 import util.Edge;
 import util.Graph;
+import util.Result;
 
 import java.util.Hashtable;
 import java.util.LinkedList;
@@ -9,6 +10,43 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Parallel {
+
+    public static Result edgesInsertion(Graph graph, LinkedList<Edge> dynamicEdges) {
+        //todo
+
+
+        Hashtable<Edge, Boolean> edgeVisitedMap = new Hashtable<>();
+        for (Edge e : graph.getEdgeSet()) {
+            edgeVisitedMap.put(e, false);
+        }
+
+        return null;
+    }
+
+    public static Result edgesDeletion(Graph graph, LinkedList<Edge> dynamicEdges) {
+        //todo
+
+        return null;
+    }
+
+
+    public static Result edgesTDSInsertion(Graph graph, LinkedList<Edge> tds) {
+        //todo
+
+
+
+        return null;
+    }
+
+    public static Result edgesTDSDeletion(Graph graph, LinkedList<Edge> tds) {
+        //todo
+
+        return null;
+    }
+
+
+
+
 
     public static ExecutorService getThreadPool() {
         int cpuNum = Runtime.getRuntime().availableProcessors();
@@ -35,7 +73,7 @@ public class Parallel {
         ExecutorService threadPool = Parallel.getThreadPool();
 
         for (Edge e : insertEdges) {
-            threadPool.submit(new SupTrussInsertion(graph, e));
+            threadPool.submit(new ParaEdgesInsertion(graph, e));
             System.out.println("inserting edge:e"+e.toString());
         }
         System.out.println(graph.getEdgeSet().toString());

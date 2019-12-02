@@ -33,9 +33,10 @@ public class Export {
 
 
         BufferedWriter bw = new BufferedWriter(new FileWriter(fileName));
-        bw.write("takenTime:"+takenTime+"ms");
+        bw.write("#takenTime:"+takenTime+"ms");
         bw.newLine();
-        bw.write("times:"+times);
+
+        bw.write("#times:"+times);
         bw.newLine();
 
         for (Object key : output.keySet()) {

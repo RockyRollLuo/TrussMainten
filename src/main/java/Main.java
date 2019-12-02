@@ -1,5 +1,8 @@
 import algorithm.SupTruss;
+import algorithm.TCPIndex;
 import algorithm.TrussDecomp;
+import algorithm.parallel.Parallel;
+import org.apache.log4j.Logger;
 import util.*;
 import util.SetOpt.Option;
 
@@ -8,8 +11,7 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 
 public class Main {
-//    @Option(abbr = 'a', usage = "0:trussDecomp, 1:TCP-Index, 2:OneEdgeTrussDecomp, 3:MultipleEdges, 4:MultipleVertices")
-//    public static int algorithm = 0;
+    private static Logger LOGGER = Logger.getLogger(Main.class);
 
     @Option(abbr = 'r', usage = "Print the result.")
     public static boolean printResult = true;
@@ -23,11 +25,8 @@ public class Main {
     @Option(abbr = 'o', usage = "orders of magnitude,number=2^o,o=0,1,2,3,4,5,6")
     public static int order = 0;
 
-    @Option(abbr = 'd', usage = "dynamic insertion or deletion, insert:insertion, delete:deletion")
-    public static String d = "insert1";
-
-    @Option(abbr = 'e', usage = "execution, sequ:sequential, para:parallel")
-    public static String e = "sequ";
+    @Option(abbr = 'a', usage = "algorithm type, 0:TrussDecomp, 1:MultiEdgesInsertion, 2:MultiEdgesDeletion, 3:MultiVerticesInsertion, 4:MultiVerticesDeletion")
+    public static int a = 0;
 
 
     public static void main(String[] args) throws IOException {
@@ -37,61 +36,78 @@ public class Main {
 
         //read graph
         String datasetName = args[0];
-        Graph dataSet = GraphImport.load(datasetName, delim, debug);
+        Graph fullGraph = GraphImport.load(datasetName, delim, debug);
 
         //dynamic edges 2^d
-        LinkedList<Edge> dynamicEdges = RandomUtils.getRandomSetFromSet(dataSet.getEdgeSet(), (int) Math.pow(2, order));
+        LinkedList<Edge> dynamicEdges = RandomUtils.getRandomSetFromSet(fullGraph.getEdgeSet(), (int) Math.pow(2, order));
 
         //Graph
-        LinkedList<Edge> edgeSet = (LinkedList<Edge>) dataSet.getEdgeSet().clone();
-        Hashtable<Integer, LinkedList<Integer>> adjMap = GraphHandler.deepCloneAdjMap(dataSet.getAdjMap());
+        LinkedList<Edge> edgeSet = (LinkedList<Edge>) fullGraph.getEdgeSet().clone();
+        Hashtable<Integer, LinkedList<Integer>> adjMap = GraphHandler.deepCloneAdjMap(fullGraph.getAdjMap());
         edgeSet.removeAll(dynamicEdges);
         adjMap = GraphHandler.removeEdgesFromAdjMap(adjMap, dynamicEdges);
-        Graph graph = new Graph(adjMap, edgeSet);
+        Graph restGraph = new Graph(adjMap, edgeSet);
 
+        //result
+        Result result_full = new TrussDecomp(fullGraph).run();
+        Result result_rest = new TrussDecomp(restGraph).run();
+        result_full.setDatasetName(datasetName+"full");
+        result_rest.setDatasetName(datasetName+"rest");
 
-
-
-
+        Result result1 = null;
+        Result result2 = null;
+        Result result3 = null;
 
         /**
-         * INSERTION: graph->dataSet
+         * Dynamic type
          */
-        if (d.equals("insert")) {
-            //trussDecomp ture
-            Result result = new TrussDecomp(dataSet).run();
-            result.setDatasetName(datasetName);
+        switch (a) {
+            case 0:
+                Export.writeFile(result_full, debug);
+                break;
+            case 1:
+                /**
+                 * MultiEdgesInsertion
+                 */
+                result1 = TCPIndex.edgesInsertion(restGraph, dynamicEdges);
+                result2 = SupTruss.edgesInsertion(restGraph, dynamicEdges);
+                result3 = Parallel.edgesInsertion(restGraph, dynamicEdges);
 
-            //tds
-            Result result1 = SupTruss.edgesInsertion(graph, dynamicEdges);
-            result1.setDatasetName(datasetName);
+                result1.setDatasetName(datasetName);
+                result2.setDatasetName(datasetName);
+                result3.setDatasetName(datasetName);
 
-
-            //print result
-            if (printResult) {
-                Export.writeFile(result, debug);
                 Export.writeFile(result1, debug);
-            }
+                Export.writeFile(result2, debug);
+                Export.writeFile(result3, debug);
 
-            /**
-             * DELETION: dataSet->graph
-             */
-        } else if (d.equals("delete")) {
-            //trussDecomp ture
-            Result result = new TrussDecomp(graph).run();
-            result.setDatasetName(datasetName);
+                break;
+            case 2:
+                /**
+                 * MultiEdgesInsertion
+                 */
+                result1 = TCPIndex.edgesDeletion(fullGraph, dynamicEdges);
+                result2 = SupTruss.edgesDeletion(fullGraph, dynamicEdges);
+                result3 = Parallel.edgesDeletion(fullGraph, dynamicEdges);
 
+                result1.setDatasetName(datasetName);
+                result2.setDatasetName(datasetName);
+                result3.setDatasetName(datasetName);
 
-            //SupTruss
-            Result result1 = SupTruss.edgesDeletion(graph, dynamicEdges);
-            result1.setDatasetName(datasetName);
-
-            //print result
-            if (printResult) {
-                Export.writeFile(result, debug);
                 Export.writeFile(result1, debug);
-            }
+                Export.writeFile(result2, debug);
+                Export.writeFile(result3, debug);
+
+                break;
+            case 3:
+
+                break;
+            case 4:
+
+                break;
+            default:
+
+                break;
         }
     }
-
 }
