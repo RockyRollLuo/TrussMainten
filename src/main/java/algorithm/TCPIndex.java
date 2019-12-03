@@ -9,6 +9,13 @@ import java.util.*;
 
 public class TCPIndex {
 
+    /**
+     * compute the lower bound of the new inserting edge
+     * @param graph
+     * @param trussMap
+     * @param e
+     * @return
+     */
     private static int computeTrussnessLowerBound(Graph graph, Hashtable<Edge, Integer> trussMap, Edge e) {
         Hashtable<Integer, LinkedList<Integer>> adjMap = graph.getAdjMap();
 
@@ -41,6 +48,13 @@ public class TCPIndex {
         return key_truss - 1;
     }
 
+    /**
+     * compute the upper bound of the new inserting edge
+     * @param graph
+     * @param trussMap
+     * @param e
+     * @return
+     */
     private static int computeTrussnessUpperBound(Graph graph, Hashtable<Edge, Integer> trussMap, Edge e) {
         Hashtable<Integer, LinkedList<Integer>> adjMap = graph.getAdjMap();
 
@@ -81,11 +95,21 @@ public class TCPIndex {
      * @return
      */
     public static Result edgesInsertion(Graph graph, LinkedList<Edge> dynamicEdges) {
-        //todo
+        long startTime = System.currentTimeMillis();
+        Hashtable<Integer, LinkedList<Integer>> adjMap = graph.getAdjMap();
+        LinkedList<Edge> edgeSet = graph.getEdgeSet();
+        Result tempResult=null;
 
-        return null;
+        while (!dynamicEdges.isEmpty()) {
+            Edge e0 = dynamicEdges.poll();
+            tempResult = edgeInsertionRun(graph, e0);
+            //update graph
+            adjMap = GraphHandler.insertEdgeToAdjMap(adjMap, e0);
+            edgeSet.add(e0);
+            graph = new Graph(adjMap, edgeSet);
+        }
+        return new Result(tempResult.getOutput(), System.currentTimeMillis() - startTime,"TCPInsertionMulitiEdges");
     }
-
 
     /**
      * compute the trussness of vertices in the given graph
@@ -203,9 +227,20 @@ public class TCPIndex {
      * @return
      */
     public static Result edgesDeletion(Graph graph, LinkedList<Edge> dynamicEdges) {
-        //todo
+        long startTime = System.currentTimeMillis();
+        Hashtable<Integer, LinkedList<Integer>> adjMap = graph.getAdjMap();
+        LinkedList<Edge> edgeSet = graph.getEdgeSet();
+        Result tempResult=null;
 
-        return null;
+        while (!dynamicEdges.isEmpty()) {
+            Edge e0 = dynamicEdges.poll();
+            tempResult = edgeDeletionRun(graph, e0);
+            //update graph
+            adjMap = GraphHandler.removeEdgeFromAdjMap(adjMap, e0);
+            edgeSet.add(e0);
+            graph = new Graph(adjMap, edgeSet);
+        }
+        return new Result(tempResult.getOutput(), System.currentTimeMillis() - startTime,"TCPInsertionMulitiEdges");
     }
 
 

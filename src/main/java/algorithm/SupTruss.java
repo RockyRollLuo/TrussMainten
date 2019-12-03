@@ -22,7 +22,7 @@ public class SupTruss {
 
         LinkedList<Edge> newEdgeSet = (LinkedList<Edge>) oldEdgeSet.clone();
         newEdgeSet.remove(e0);
-        Hashtable<Integer, LinkedList<Integer>> newAdjMap = GraphHandler.romveEdgeFromAdjMap(oldAdjMap, e0);
+        Hashtable<Integer, LinkedList<Integer>> newAdjMap = GraphHandler.removeEdgeFromAdjMap(oldAdjMap, e0);
         Graph newGraph = new Graph(newAdjMap, newEdgeSet);
 
         return edgeInsertion(newGraph, e0);
@@ -116,7 +116,7 @@ public class SupTruss {
                 if (sMap.get(e_stack) > t_root - 2) {
                     int a = e_stack.getV1();
                     int b = e_stack.getV2();
-                    LinkedList<Integer> setC=GraphHandler.getCommonNeighbors(newAdjMap,e_stack);
+                    LinkedList<Integer> setC = GraphHandler.getCommonNeighbors(newAdjMap, e_stack);
 
                     for (int c : setC) {
                         Edge ac = new Edge(a, c);
@@ -173,25 +173,30 @@ public class SupTruss {
 
     /**
      * insert a random set of edges to graph
+     *
      * @param graph
      * @param dynamicEdges
      * @return
      */
-    public static Result edgesInsertion(Graph graph, LinkedList<Edge> dynamicEdges) {
+    public static Result edgesInsertion(Graph graph, LinkedList<Edge> dynamicEdges, Hashtable<Edge, Integer> trussMap) {
+        int edgeNum = dynamicEdges.size();
+
         long totalTime = 0;
         Result tempResult = null;
-        int times=0;
+        int times = 0;
 
         while (!dynamicEdges.isEmpty()) {
+            LOGGER.info("SupTruss insert multiple edge: "+(edgeNum-dynamicEdges.size())+"/"+edgeNum);
 
             LinkedList<Edge> tds = GraphHandler.getInsertionTDS(graph, dynamicEdges);
 
             //compute tds
-            tempResult = edgeTDSInsertion(graph, tds);
+            tempResult = edgeTDSInsertion(graph, tds, trussMap);
             totalTime += tempResult.getTakenTime();
 
             //update graph
             graph = tempResult.getGraph();
+            trussMap = (Hashtable<Edge, Integer>) tempResult.getOutput();
 
             //update dynamicEdges
             dynamicEdges.removeAll(tds);
@@ -199,7 +204,7 @@ public class SupTruss {
             times++;
         }
 
-        Result result = new Result(tempResult.getOutput(), totalTime, "SupTrussEdges");
+        Result result = new Result(trussMap, totalTime, "SupTrussEdges");
         result.setTimes(times);
 
         return result;
@@ -212,8 +217,8 @@ public class SupTruss {
      * @param tds
      * @return
      */
-    public static Result edgeTDSInsertion(Graph graph, LinkedList<Edge> tds) {
-        LOGGER.info("Initial SupTruss Inserte  TDS:" + tds.toString());
+    public static Result edgeTDSInsertion(Graph graph, LinkedList<Edge> tds, Hashtable<Edge, Integer> trussMap) {
+        LOGGER.info("Start SupTruss Insert TDS:" + tds.getFirst().toString());
 
         Hashtable<Integer, LinkedList<Integer>> oldAdjMap = graph.getAdjMap();
         LinkedList<Edge> oldEdgeSet = graph.getEdgeSet();
@@ -224,9 +229,6 @@ public class SupTruss {
         Hashtable<Integer, LinkedList<Integer>> newAdjMap = GraphHandler.deepCloneAdjMap(oldAdjMap);
         newAdjMap = GraphHandler.insertEdgesToAdjMap(newAdjMap, tds);
         Graph newGraph = new Graph(newAdjMap, newEdgeSet);
-
-        //compute trussMap from old graph
-        Hashtable<Edge, Integer> trussMap = GraphHandler.computeTrussMap(graph);
 
         //computing trussness of new inserting edges
         for (Edge e0 : tds) {
@@ -290,7 +292,7 @@ public class SupTruss {
                 if (sMap.get(e_stack) > t_root - 2) {
                     int a = e_stack.getV1();
                     int b = e_stack.getV2();
-                    LinkedList<Integer> setC=GraphHandler.getCommonNeighbors(newAdjMap,e_stack);
+                    LinkedList<Integer> setC = GraphHandler.getCommonNeighbors(newAdjMap, e_stack);
 
                     for (int c : setC) {
                         Edge ac = new Edge(a, c);
@@ -340,7 +342,7 @@ public class SupTruss {
         long endTime = System.currentTimeMillis();
         Result result = new Result(trussMap, endTime - startTime, "SupTrussInsertEdge");
 
-        LOGGER.info("Truss decomposition is computed");
+        LOGGER.info("End SupTruss insert tds is computed");
         return result;
     }
 
@@ -380,7 +382,7 @@ public class SupTruss {
         LinkedList<Edge> newEdgeSet = (LinkedList<Edge>) oldEdgeSet.clone();
         newEdgeSet.remove(e0);
         Hashtable<Integer, LinkedList<Integer>> newAdjMap = GraphHandler.deepCloneAdjMap(oldAdjMap);
-        newAdjMap = GraphHandler.romveEdgeFromAdjMap(oldAdjMap, e0);
+        newAdjMap = GraphHandler.removeEdgeFromAdjMap(oldAdjMap, e0);
         Graph newGraph = new Graph(newAdjMap, newEdgeSet);
 
         //compute old graph trussMap
@@ -499,25 +501,27 @@ public class SupTruss {
 
     /**
      * delete a random set of edge from graph
+     *
      * @param graph
      * @param dynamicEdges
      * @return
      */
-    public static Result edgesDeletion(Graph graph, LinkedList<Edge> dynamicEdges) {
+    public static Result edgesDeletion(Graph graph, LinkedList<Edge> dynamicEdges, Hashtable<Edge, Integer> trussMap) {
         long totalTime = 0;
         Result tempResult = null;
-        int times=0;
+        int times = 0;
 
         while (!dynamicEdges.isEmpty()) {
 
             LinkedList<Edge> tds = GraphHandler.getDeletionTDS(graph, dynamicEdges);
 
             //compute tds
-            tempResult = edgeTDSInsertion(graph, tds);
+            tempResult = edgeTDSDeletion(graph, tds, trussMap);
             totalTime += tempResult.getTakenTime();
 
             //update graph
             graph = tempResult.getGraph();
+            trussMap = (Hashtable<Edge, Integer>) tempResult.getOutput();
 
             //update dynamicEdges
             dynamicEdges.removeAll(tds);
@@ -534,11 +538,12 @@ public class SupTruss {
 
     /**
      * delete a tds from a graph
+     *
      * @param graph
      * @param tds
      * @return
      */
-    public static Result edgeTDSDeletion(Graph graph, LinkedList<Edge> tds) {
+    public static Result edgeTDSDeletion(Graph graph, LinkedList<Edge> tds, Hashtable<Edge, Integer> trussMap) {
         LOGGER.info("SupTruss deletion tds:" + tds.toString());
 
         Hashtable<Integer, LinkedList<Integer>> oldAdjMap = graph.getAdjMap();
@@ -548,11 +553,8 @@ public class SupTruss {
         LinkedList<Edge> newEdgeSet = (LinkedList<Edge>) oldEdgeSet.clone();
         newEdgeSet.remove(tds);
         Hashtable<Integer, LinkedList<Integer>> newAdjMap = GraphHandler.deepCloneAdjMap(oldAdjMap);
-        newAdjMap = GraphHandler.removeEdgesFromAdjMap(oldAdjMap,tds);
+        newAdjMap = GraphHandler.removeEdgesFromAdjMap(oldAdjMap, tds);
         Graph newGraph = new Graph(newAdjMap, newEdgeSet);
-
-        //compute trussMap from old graph
-        Hashtable<Edge, Integer> trussMap = GraphHandler.computeTrussMap(graph);
 
 
         /**

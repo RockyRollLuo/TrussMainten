@@ -1,33 +1,26 @@
 package algorithm.parallel;
 
+import org.apache.log4j.Logger;
 import util.Edge;
 import util.Graph;
+import util.GraphHandler;
 
 import java.util.*;
 
-public class ParaEdgesInsertion implements Runnable {
+public class ParaEdgeInsertion implements Runnable {
+    private static Logger LOGGER = Logger.getLogger(ParaEdgeInsertion.class);
+
 
     private Graph graph;
     private Edge e0;
     private Hashtable<Edge, Integer> trussMap; //include edges in graph and e0
 
-    private Hashtable<Edge, Boolean> edgeVisitedMap;
+    private Hashtable<Edge, Boolean> edgeVisitedMap; //initial
 
     /**
      * constructor
      */
-    public ParaEdgesInsertion(Graph graph, Edge e0) {
-        this.graph = graph;
-        this.e0 = e0;
-    }
-
-    public ParaEdgesInsertion(Graph graph, Edge e0, Hashtable<Edge, Integer> trussMap) {
-        this.graph = graph;
-        this.e0 = e0;
-        this.trussMap = trussMap;
-    }
-
-    public ParaEdgesInsertion(Graph graph, Edge e0, Hashtable<Edge, Integer> trussMap, Hashtable<Edge, Boolean> edgeVisitedMap) {
+    public ParaEdgeInsertion(Graph graph, Edge e0, Hashtable<Edge, Integer> trussMap, Hashtable<Edge, Boolean> edgeVisitedMap) {
         this.graph = graph;
         this.e0 = e0;
         this.trussMap = trussMap;
@@ -36,6 +29,7 @@ public class ParaEdgesInsertion implements Runnable {
 
     @Override
     public void run() {
+        LOGGER.info("Start run thread ParaEdgeInsertion e0:" + e0.toString());
         Hashtable<Integer, LinkedList<Integer>> adjMap = graph.getAdjMap();
         LinkedList<Edge> edgeSet = graph.getEdgeSet();
         Integer v1_e0 = e0.getV1();
@@ -81,6 +75,7 @@ public class ParaEdgesInsertion implements Runnable {
         }
         t_UB = t_UB - 1;
 
+        //update trussness of new edge
         trussMap.put(e0, t_LB);
 
         //3.compute local sSupMap
@@ -154,11 +149,69 @@ public class ParaEdgesInsertion implements Runnable {
         }
 
         //7.Traversal
+        for (Edge e_root : promoteEdgeSet) {
+            int t_root = trussMap.get(e_root);
+            sMap.put(e_root, pSupMap.get(e_root));
+            edgeVisitedMap.put(e_root, true);
 
+            Stack<Edge> stack = new Stack<>();
+            stack.push(e_root);
+            while (!stack.empty()) {
+                Edge e_stack = stack.pop();
+                if (sMap.get(e_stack) > t_root - 2) {
+                    int a = e_stack.getV1();
+                    int b = e_stack.getV2();
 
-        //TODO
+                    LinkedList<Integer> setA = adjMap.get(a);
+                    LinkedList<Integer> setB = adjMap.get(b);
+                    LinkedList<Integer> setC = (LinkedList<Integer>) setA.clone();
+                    setC.retainAll(setB);
+
+                    for (int c : setC) {
+                        Edge ac = new Edge(a, c);
+                        Edge bc = new Edge(b, c);
+
+                        if (trussMap.get(ac) == t_root && trussMap.get(bc) > t_root && sSupMap.get(ac) > t_root - 2 && !edgeVisitedMap.get(ac)) {
+                            stack.push(ac);
+                            edgeVisitedMap.put(ac, true);
+                            int s_ac = sMap.get(ac);
+                            sMap.put(ac, s_ac + pSupMap.get(ac));
+                        } else if (trussMap.get(bc) == t_root && trussMap.get(ac) > t_root && sSupMap.get(bc) > t_root - 2 && !edgeElimainateMap.get(bc)) {
+                            stack.push(bc);
+                            edgeVisitedMap.put(bc, true);
+                            int s_bc = sMap.get(bc);
+                            sMap.put(bc, s_bc + pSupMap.get(bc));
+                        } else if (trussMap.get(ac) == t_root && trussMap.get(bc) == t_root && sSupMap.get(ac) > t_root - 2 && sSupMap.get(bc) > t_root - 2) {
+                            if (!edgeVisitedMap.get(ac)) {
+                                stack.push(ac);
+                                edgeVisitedMap.put(ac, true);
+                                int s_ac = sMap.get(ac);
+                                sMap.put(ac, s_ac + pSupMap.get(ac));
+                            }
+                            if (!edgeVisitedMap.get(bc)) {
+                                stack.push(bc);
+                                edgeVisitedMap.put(bc, true);
+                                int s_bc = sMap.get(bc);
+                                sMap.put(bc, s_bc + pSupMap.get(bc));
+                            }
+                        }
+                    }
+                } else {
+                    if (!edgeElimainateMap.get(e_stack)) {
+                        eliminate(adjMap, trussMap, sMap, edgeElimainateMap, t_root, e_stack);
+                    }
+                }
+            }
+        }
+
+        for (Edge e : edgeSet) {
+            if (edgeVisitedMap.get(e) && !edgeElimainateMap.get(e)) {
+                int t = trussMap.get(e);
+                trussMap.put(e, t + 1);
+            }
+        }
+        LOGGER.info("End run thread ParaEdgeInsertion e0:" + e0.toString());
     }
-
 
     /***
      *  eliminate

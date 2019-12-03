@@ -16,10 +16,9 @@ public class Export {
     /**
      * write the result to a file
      * @param result
-     * @param debug
      * @throws IOException
      */
-    public static void writeFile(Result result, int debug) throws IOException {
+    public static void writeFile(Result result) throws IOException {
         long takenTime = result.getTakenTime();
         Hashtable<Object, Integer> output = (Hashtable<Object, Integer>) result.getOutput();
         String algorithmName = result.getAlgorithmName();
@@ -28,8 +27,7 @@ public class Export {
 
         String fileName="outputs\\"+algorithmName+"_"+datasetName;
 
-        if (debug>0)
-            LOGGER.info("Exporting graph... ");
+        LOGGER.info("Exporting graph... ");
 
 
         BufferedWriter bw = new BufferedWriter(new FileWriter(fileName));
@@ -45,8 +43,7 @@ public class Export {
         }
         bw.close();
 
-        if (debug>0)
-            LOGGER.info("Graph was exported.: " + fileName);
+        LOGGER.info("Graph was exported.: " + fileName);
 
     }
 }

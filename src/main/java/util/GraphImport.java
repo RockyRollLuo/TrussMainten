@@ -20,15 +20,13 @@ public class GraphImport {
      *
      * @param datasetName dataset name
      * @param delim       seperate sybolm
-     * @param debug
      * @return a graph
      * @throws IOException
      */
-    public static Graph load(String datasetName, String delim, int debug) throws IOException {
+    public static Graph load(String datasetName, String delim) throws IOException {
         String path = "datasets\\" + datasetName;
 
-        if (debug > 0)
-            LOGGER.info("loading graph...: " + path);
+        LOGGER.info("loading graph...: " + path);
 
         final Hashtable<Integer, LinkedList<Integer>> adjMap = new Hashtable<>();
 //        final HashSet<Edge> tempEdgeSet = new HashSet<>();
@@ -40,11 +38,8 @@ public class GraphImport {
             if (line == null) {
                 break;
             } else if (line.startsWith("#") || line.startsWith("%") || line.startsWith("//")) { //comment
-
-                if (debug > 1) {
-                    LOGGER.info("The following line was ignored during loading a graph:");
-                    System.err.println(line);
-                }
+//                LOGGER.info("The following line was ignored during loading a graph:");
+//                System.err.println(line);
                 continue;
             } else {
                 String[] tokens = line.split(delim);
@@ -71,8 +66,7 @@ public class GraphImport {
             }
         }
 
-        if (debug > 0)
-            LOGGER.info("graph was loaded: " + path);
+        LOGGER.info("graph was loaded: " + path);
 
         return new Graph(adjMap, edgeSet);
     }

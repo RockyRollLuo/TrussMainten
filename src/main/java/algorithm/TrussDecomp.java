@@ -94,7 +94,7 @@ public class TrussDecomp {
 
                 trussMap.put(e_queue, t);
                 remainEdges.remove(e_queue);
-                remianAdjMap = GraphHandler.romveEdgeFromAdjMap(remianAdjMap, e_queue);
+                remianAdjMap = GraphHandler.removeEdgeFromAdjMap(remianAdjMap, e_queue);
             }
         }
 

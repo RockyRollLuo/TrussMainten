@@ -1,10 +1,12 @@
 package util;
 
 import algorithm.TrussDecomp;
+import org.apache.log4j.Logger;
 
 import java.util.*;
 
 public class GraphHandler {
+    private static Logger LOGGER = Logger.getLogger(GraphHandler.class);
 
     /**
      * whether two lists have common elements
@@ -130,7 +132,7 @@ public class GraphHandler {
      * @param e      removed edge
      * @return new adjMap
      */
-    public static Hashtable<Integer, LinkedList<Integer>> romveEdgeFromAdjMap(Hashtable<Integer, LinkedList<Integer>> adjMap, Edge e) {
+    public static Hashtable<Integer, LinkedList<Integer>> removeEdgeFromAdjMap(Hashtable<Integer, LinkedList<Integer>> adjMap, Edge e) {
         Hashtable<Integer, LinkedList<Integer>> newAdjMap = (Hashtable<Integer, LinkedList<Integer>>) adjMap.clone();
         Integer v1 = e.getV1();
         Integer v2 = e.getV2();
@@ -162,7 +164,7 @@ public class GraphHandler {
         Hashtable<Integer, LinkedList<Integer>> newAdjMap = (Hashtable<Integer, LinkedList<Integer>>) adjMap.clone();
 
         for (Edge e : changeEdges) {
-            romveEdgeFromAdjMap(newAdjMap, e);
+            removeEdgeFromAdjMap(newAdjMap, e);
         }
         return newAdjMap;
     }
@@ -209,7 +211,7 @@ public class GraphHandler {
             commonTrussList.add(Math.min(trussMap.get(e1), trussMap.get(e2)));
         }
 
-        int t_common_max = Collections.max(commonTrussList);
+        int t_common_max = (Collections.max(commonTrussList)==null)?0:Collections.max(commonTrussList);
         HashMap<Integer, Integer> countMap = new HashMap<>();
         for (int i = 2; i < t_common_max + 2; i++) {      //countMap.put(t_common_max + 1, 0), prevent null pointer
             int count = 0;
@@ -327,6 +329,7 @@ public class GraphHandler {
      * @return
      */
     public static LinkedList<Edge> getInsertionTDS(Graph graph, LinkedList<Edge> addEdges) {
+        LOGGER.info("Start GraphHandler getInsertionTDS");
         LinkedList<Edge> tds = new LinkedList<>();
 
         Hashtable<Integer, LinkedList<Integer>> adjMap = graph.getAdjMap();
@@ -335,19 +338,24 @@ public class GraphHandler {
         Edge firstEdge = addEdges.poll();
         tds.add(firstEdge);
 
-        for (Edge e_new : addEdges) {
-            adjMap = GraphHandler.insertEdgeToAdjMap(adjMap, e_new);
+        while (!addEdges.isEmpty()) {
+            Edge e_new = addEdges.poll();
+
+            adjMap = GraphHandler.insertEdgeToAdjMap(adjMap, e_new); //if insert the new edge
             LinkedList<Edge> e_new_triangleEdgeSet = getTriangleEdges(adjMap, e_new);
 
-            for (Edge e_tds : tds) {
+            boolean tdsFlag = true;
+            for (int i = 0; i < tds.size(); i++) {
+                Edge e_tds = tds.get(i);
                 LinkedList<Edge> e_tds_triangleEdgeSet = getTriangleEdges(adjMap, e_tds);
-
-                if (!haveCommonElement(e_new_triangleEdgeSet, e_tds_triangleEdgeSet)) {
-                    tds.offer(e_new);
-                } else {
-                    adjMap = GraphHandler.romveEdgeFromAdjMap(adjMap, e_new); //insert first to judge, if not than remove
+                if (haveCommonElement(e_new_triangleEdgeSet, e_tds_triangleEdgeSet)) {
+                    adjMap = GraphHandler.removeEdgeFromAdjMap(adjMap, e_new); //insert first to judge, if not than remove
+                    tdsFlag = false;
+                    break;
                 }
             }
+            if(tdsFlag) tds.add(e_new);
+
         }
         edgeSet.addAll(tds);
         addEdges.removeAll(tds);
@@ -357,6 +365,7 @@ public class GraphHandler {
 
     /**
      * given a graph, and a set of edges in graph, compute a tds
+     *
      * @param graph
      * @param removeEdges
      * @return
@@ -378,6 +387,7 @@ public class GraphHandler {
 
                 if (!haveCommonElement(e_new_triangleEdgeSet, e_tds_triangleEdgeSet)) {
                     tds.offer(e_new);
+                    continue;
                 }
             }
         }
