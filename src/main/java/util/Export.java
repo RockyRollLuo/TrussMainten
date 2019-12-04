@@ -24,6 +24,8 @@ public class Export {
         String algorithmName = result.getAlgorithmName();
         String datasetName = result.getDatasetName();
         int times = result.getTimes();
+        int dynamicEdges = result.getDynamicEdges();
+        int threadNums = result.getThreadNums();
 
         String fileName="outputs\\"+algorithmName+"_"+datasetName;
 
@@ -35,6 +37,12 @@ public class Export {
         bw.newLine();
 
         bw.write("#times:"+times);
+        bw.newLine();
+
+        bw.write("#dynamic edges:" + dynamicEdges);
+        bw.newLine();
+
+        bw.write("#threadNums:" + threadNums); //only useful for Parallel way
         bw.newLine();
 
         for (Object key : output.keySet()) {

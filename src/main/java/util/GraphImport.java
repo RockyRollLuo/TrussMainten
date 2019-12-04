@@ -46,23 +46,16 @@ public class GraphImport {
                 int v1 = Integer.parseInt(tokens[0]); //Integer.valueof(token[0])
                 int v2 = Integer.parseInt(tokens[1]);
 
-                if (v1 == v2)
-                    continue;
+                if (v1 == v2) continue;
 
-                if (!adjMap.containsKey(v1)) {
-                    adjMap.put(v1, new LinkedList());
-                }
+                if (v1 < v2) edgeSet.add(new Edge(v1, v2));
+                else edgeSet.add(new Edge(v2, v1));
+
+                if (!adjMap.containsKey(v1)) adjMap.put(v1, new LinkedList());
                 adjMap.get(v1).add(v2);
 
-                if (!adjMap.containsKey(v2)) {
-                    adjMap.put(v2, new LinkedList());
-                }
+                if (!adjMap.containsKey(v2)) adjMap.put(v2, new LinkedList());
                 adjMap.get(v2).add(v1);
-
-                if (v1 < v2)
-                    edgeSet.add(new Edge(v1, v2));
-                else
-                    edgeSet.add(new Edge(v2, v1));
             }
         }
 

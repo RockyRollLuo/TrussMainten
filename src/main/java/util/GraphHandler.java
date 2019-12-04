@@ -140,15 +140,15 @@ public class GraphHandler {
         Set<Integer> keySet = newAdjMap.keySet();
         if (keySet.contains(v1)) {
             newAdjMap.get(v1).remove(v2);
-//            if (newAdjMap.get(v1).size() == 0) {
-//                newAdjMap.remove(v1);
-//            }
+            if (newAdjMap.get(v1).size() == 0) {
+                newAdjMap.remove(v1);
+            }
         }
         if (keySet.contains(v2)) {
             newAdjMap.get(v2).remove(v1);
-//            if (newAdjMap.get(v2).size() == 0) {
-//                newAdjMap.remove(v2);
-//            }
+            if (newAdjMap.get(v2).size() == 0) {
+                newAdjMap.remove(v2);
+            }
         }
         return newAdjMap;
     }
@@ -211,7 +211,10 @@ public class GraphHandler {
             commonTrussList.add(Math.min(trussMap.get(e1), trussMap.get(e2)));
         }
 
-        int t_common_max = (Collections.max(commonTrussList)==null)?0:Collections.max(commonTrussList);
+        if (commonTrussList.size() == 0) {
+            return 2;
+        }
+        int t_common_max = Collections.max(commonTrussList);
         HashMap<Integer, Integer> countMap = new HashMap<>();
         for (int i = 2; i < t_common_max + 2; i++) {      //countMap.put(t_common_max + 1, 0), prevent null pointer
             int count = 0;

@@ -1,12 +1,18 @@
 package util;
 
-import java.awt.image.Kernel;
-import java.util.*;
+import org.apache.log4j.Logger;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class RandomUtils {
+    private static Logger LOGGER = Logger.getLogger(RandomUtils.class);
 
-    private static ThreadLocalRandom getRandom(){
+
+    private static ThreadLocalRandom getRandom() {
         return ThreadLocalRandom.current();
     }
 
@@ -15,18 +21,18 @@ public class RandomUtils {
     }
 
     public static int getRandomInt(int min, int max) {
-        return getRandom().nextInt(max-min+1) + min;
+        return getRandom().nextInt(max - min + 1) + min;
     }
 
-    public static <E> E getRandomElement(List<E> list){
+    public static <E> E getRandomElement(List<E> list) {
         return list.get(getRandomInt(list.size()));
     }
 
-    public static <E> E getRandomElement(Set<E> set){
+    public static <E> E getRandomElement(Set<E> set) {
         int rn = getRandomInt(set.size());
         int i = 0;
         for (E e : set) {
-            if(i==rn){
+            if (i == rn) {
                 return e;
             }
             i++;
@@ -38,7 +44,7 @@ public class RandomUtils {
         int rn = getRandomInt(map.size());
         int i = 0;
         for (K key : map.keySet()) {
-            if(i==rn){
+            if (i == rn) {
                 return key;
             }
             i++;
@@ -49,6 +55,7 @@ public class RandomUtils {
     /**
      * random choose k form N
      * Reservoir sampling
+     *
      * @param list
      * @param k
      * @return
@@ -73,11 +80,14 @@ public class RandomUtils {
     /**
      * random choose a small batch set from a set
      * If it's more than half, take the other half
+     *
      * @param edgeList
-     * @param nums the size of small batch set
+     * @param nums     the size of small batch set
      * @return
      */
     public static LinkedList<Edge> getRandomSetFromSet(LinkedList<Edge> edgeList, int nums) {
+        LOGGER.info("Start get random set from set - asu:" + nums + "/" + edgeList.size());
+
         int N = edgeList.size();
 
         LinkedList<Edge> dynamicEdges = new LinkedList<>();
@@ -92,6 +102,8 @@ public class RandomUtils {
                 dynamicEdges.remove(r + 1);
             }
         }
+
+        LOGGER.info("Start get random set from set - rel:" + dynamicEdges.size() + "/" + edgeList.size());
         return dynamicEdges;
     }
 

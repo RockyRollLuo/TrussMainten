@@ -28,7 +28,7 @@ public class Main {
     @Option(abbr = 'a', usage = "algorithm type, 0:TrussDecomp, 1:MultiEdgesInsertion, 2:MultiEdgesDeletion, 3:MultiVerticesInsertion, 4:MultiVerticesDeletion")
     public static int a = 0;
 
-    @Option(abbr = 't', usage = "thread number")
+    @Option(abbr = 't', usage = "max thread number")
     public static int t = 1;
 
 
@@ -38,7 +38,7 @@ public class Main {
         args = SetOpt.setOpt(main, args);
 
         LOGGER.info("Basic information:");
-        System.err.println("Dynamic edges:" + Math.pow(2, order));
+        System.err.println("Dynamic edges:" + (int) Math.pow(2, order));
         System.err.println("Algorithm type:" + a);
         System.err.println("Thread number:" + t);
 
@@ -47,7 +47,8 @@ public class Main {
         Graph fullGraph = GraphImport.load(datasetName, delim);
 
         //dynamic edges 2^d
-        LinkedList<Edge> dynamicEdges = RandomUtils.getRandomSetFromSet(fullGraph.getEdgeSet(), (int) Math.pow(2, order));
+        int dynamicEdgesSize = (int) Math.pow(2, order);
+        LinkedList<Edge> dynamicEdges = RandomUtils.getRandomSetFromSet(fullGraph.getEdgeSet(), dynamicEdgesSize);
 
         //Graph
         LinkedList<Edge> edgeSet = (LinkedList<Edge>) fullGraph.getEdgeSet().clone();
@@ -58,13 +59,18 @@ public class Main {
 
         //result
         Result result_full = new TrussDecomp(fullGraph).run();
-        result_full.setDatasetName(datasetName + "full");
-        Hashtable<Edge, Integer> trussMap_full = (Hashtable<Edge, Integer>) result_full.getOutput();
+        result_full.setDatasetName(datasetName + "_full");
+        result_full.setDynamicEdges(0);
+        result_full.setThreadNums(0);
 
         Result result_rest = new TrussDecomp(restGraph).run();
-        result_rest.setDatasetName(datasetName + "rest");
-        Hashtable<Edge, Integer> trussMap_rest = (Hashtable<Edge, Integer>) result_full.getOutput();
+        result_rest.setDatasetName(datasetName + "_rest");
+        result_full.setDynamicEdges(0);
+        result_full.setThreadNums(0);
 
+        //prepare for algorithms below
+        Hashtable<Edge, Integer> trussMap_full = (Hashtable<Edge, Integer>) result_full.getOutput();
+        Hashtable<Edge, Integer> trussMap_rest = (Hashtable<Edge, Integer>) result_full.getOutput();
 
         Result result1 = null;
         Result result2 = null;
@@ -83,13 +89,17 @@ public class Main {
                  * MultiEdgesInsertion
                  */
                 LOGGER.info("==Algorithm 1: MultiEdgesInsertion========");
-//                result1 = TCPIndex.edgesInsertion(restGraph, dynamicEdges,trussMap_full); //todo
+                result1 = TCPIndex.edgesInsertion(restGraph, dynamicEdges, trussMap_full);
                 result2 = SupTruss.edgesInsertion(restGraph, dynamicEdges, trussMap_full);
                 result3 = Parallel.edgesInsertion(restGraph, dynamicEdges, trussMap_full, t);
 
-//                result1.setDatasetName(datasetName);
+                result1.setDatasetName(datasetName);
                 result2.setDatasetName(datasetName);
                 result3.setDatasetName(datasetName);
+
+                result1.setDynamicEdges(dynamicEdgesSize);
+                result2.setDynamicEdges(dynamicEdgesSize);
+                result3.setDynamicEdges(dynamicEdgesSize);
 
                 Export.writeFile(result_full);
 
@@ -99,27 +109,27 @@ public class Main {
                  * MultiEdgesInsertion
                  */
                 LOGGER.info("==Algorithm 2: MultiEdgesDeletion========");
-//                result1 = TCPIndex.edgesDeletion(fullGraph, dynamicEdges, trussMap_rest);//todo
+                result1 = TCPIndex.edgesDeletion(fullGraph, dynamicEdges, trussMap_rest);
                 result2 = SupTruss.edgesDeletion(fullGraph, dynamicEdges, trussMap_rest);
                 result3 = Parallel.edgesDeletion(fullGraph, dynamicEdges, trussMap_rest, t);
 
-//                result1.setDatasetName(datasetName);
+                result1.setDatasetName(datasetName);
                 result2.setDatasetName(datasetName);
                 result3.setDatasetName(datasetName);
 
-
+                Export.writeFile(result_rest);
                 break;
             case 3:
-
+                LOGGER.info("==Algorithm 3: MultiVerticsInsertion========");
                 break;
             case 4:
-
+                LOGGER.info("==Algorithm 4: MultiVerticsDeletion========");
                 break;
             default:
 
                 break;
         }
-//        Export.writeFile(result1);
+        Export.writeFile(result1);
         Export.writeFile(result2);
         Export.writeFile(result3);
     }

@@ -8,6 +8,9 @@ public class Result {
     private int times;
     private String algorithmName;
     private String datasetName;
+    private int dynamicEdges;
+    private int threadNums;
+
 
     public Result(Object output, long takenTime) {
         this.output = output;
@@ -92,5 +95,21 @@ public class Result {
 
     public void setDatasetName(String datasetName) {
         this.datasetName = datasetName;
+    }
+
+    public int getDynamicEdges() {
+        return dynamicEdges;
+    }
+
+    public void setDynamicEdges(int dynamicEdges) {
+        this.dynamicEdges = dynamicEdges;
+    }
+
+    public int getThreadNums() {
+        return threadNums;
+    }
+
+    public void setThreadNums(int threadNums) {
+        this.threadNums = threadNums;
     }
 }

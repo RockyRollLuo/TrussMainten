@@ -23,8 +23,7 @@ public class Parallel {
      * @return
      */
     public static Result edgesInsertion(Graph graph, LinkedList<Edge> dynamicEdges, Hashtable<Edge, Integer> trussMap, int threadNum) {
-        LOGGER.info("Starting Parallel insert edges, threadNum:" + threadNum);
-
+        LOGGER.info("Start Parallel insert dynamicEdges, size=" + dynamicEdges.size());
 
         long totalTime = 0;
         Result tempResult = null;
@@ -45,6 +44,8 @@ public class Parallel {
 
         Result result = new Result(trussMap, totalTime, "ParaMultiEdgesInsertion");
         result.setTimes(times);
+
+        LOGGER.info("End Parallel insert dynamicEdges, size=" + dynamicEdges.size());
         return result;
     }
 
@@ -84,7 +85,7 @@ public class Parallel {
      * @return
      */
     public static Result edgesDeletion(Graph graph, LinkedList<Edge> dynamicEdges, Hashtable<Edge, Integer> trussMap, int threadNum) {
-
+        LOGGER.info("Start Parallel delete dynamicEdges, size=" + dynamicEdges.size());
         long totalTime = 0;
         Result tempResult = null;
         int times = 0;
@@ -104,6 +105,8 @@ public class Parallel {
 
         Result result = new Result(trussMap, totalTime, "ParaMultiEdgesInsertion");
         result.setTimes(times);
+
+        LOGGER.info("End Parallel insert dynamicEdges, size=" + dynamicEdges.size());
         return result;
     }
 

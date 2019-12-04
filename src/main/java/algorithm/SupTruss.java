@@ -179,20 +179,21 @@ public class SupTruss {
      * @return
      */
     public static Result edgesInsertion(Graph graph, LinkedList<Edge> dynamicEdges, Hashtable<Edge, Integer> trussMap) {
-        int edgeNum = dynamicEdges.size();
+        LOGGER.info("Start SupTruss insert dynamicEdges, size=" + dynamicEdges.size());
 
-        long totalTime = 0;
+        long startTime = System.currentTimeMillis();
+
+        int edgeNum = dynamicEdges.size();
         Result tempResult = null;
         int times = 0;
 
         while (!dynamicEdges.isEmpty()) {
-            LOGGER.info("SupTruss insert multiple edge: "+(edgeNum-dynamicEdges.size())+"/"+edgeNum);
+            LOGGER.info("SupTruss insert multiple edge: "+(edgeNum-dynamicEdges.size())+"/"+edgeNum+"...");
 
             LinkedList<Edge> tds = GraphHandler.getInsertionTDS(graph, dynamicEdges);
 
             //compute tds
             tempResult = edgeTDSInsertion(graph, tds, trussMap);
-            totalTime += tempResult.getTakenTime();
 
             //update graph
             graph = tempResult.getGraph();
@@ -204,9 +205,10 @@ public class SupTruss {
             times++;
         }
 
-        Result result = new Result(trussMap, totalTime, "SupTrussEdges");
+        Result result = new Result(trussMap, System.currentTimeMillis() - startTime, "SupInsertEdges");
         result.setTimes(times);
 
+        LOGGER.info("End SupTruss insert dynamicEdges, size=" + dynamicEdges.size());
         return result;
     }
 
@@ -507,7 +509,10 @@ public class SupTruss {
      * @return
      */
     public static Result edgesDeletion(Graph graph, LinkedList<Edge> dynamicEdges, Hashtable<Edge, Integer> trussMap) {
-        long totalTime = 0;
+        LOGGER.info("Start SupTruss delete dynamicEdges, size=" + dynamicEdges.size());
+
+        long startTime = System.currentTimeMillis();
+
         Result tempResult = null;
         int times = 0;
 
@@ -517,7 +522,6 @@ public class SupTruss {
 
             //compute tds
             tempResult = edgeTDSDeletion(graph, tds, trussMap);
-            totalTime += tempResult.getTakenTime();
 
             //update graph
             graph = tempResult.getGraph();
@@ -529,9 +533,10 @@ public class SupTruss {
             times++;
         }
 
-        Result result = new Result(tempResult.getOutput(), totalTime, "SupTrussEdges");
+        Result result = new Result(tempResult.getOutput(), System.currentTimeMillis()-startTime, "SupDeletEdges");
         result.setTimes(times);
 
+        LOGGER.info("End SupTruss delete dynamicEdges, size=" + dynamicEdges.size());
         return result;
     }
 
