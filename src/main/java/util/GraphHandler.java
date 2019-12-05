@@ -6,7 +6,7 @@ import org.apache.log4j.Logger;
 import java.util.*;
 
 public class GraphHandler {
-    private static Logger LOGGER = Logger.getLogger(GraphHandler.class);
+//    private static Logger LOGGER = Logger.getLogger(GraphHandler.class);
 
     /**
      * whether two lists have common elements
@@ -52,7 +52,7 @@ public class GraphHandler {
      * get edge(u,v) the common neighbors of u and v
      *
      * @param adjMap
-     * @param edge
+     * @param edge the edge do not need to be an edge of adjmap
      * @return
      */
     public static LinkedList<Integer> getCommonNeighbors(Hashtable<Integer, LinkedList<Integer>> adjMap, Edge edge) {
@@ -192,13 +192,11 @@ public class GraphHandler {
     /**
      * compute the trussness of e based on the locality property
      *
-     * @param graph    new Graph
      * @param trussMap trussness of old Graph
      * @param e        new inserted edge
      * @return the trussness of e
      */
-    public static int computeTrussnessLowerBound(Graph graph, Hashtable<Edge, Integer> trussMap, Edge e) {
-        Hashtable<Integer, LinkedList<Integer>> adjMap = graph.getAdjMap();
+    public static int computeTrussnessLowerBound( Hashtable<Integer, LinkedList<Integer>> adjMap, Hashtable<Edge, Integer> trussMap, Edge e) {
 
         Integer v1_e = e.getV1();
         Integer v2_e = e.getV2();
@@ -332,32 +330,35 @@ public class GraphHandler {
      * @return
      */
     public static LinkedList<Edge> getInsertionTDS(Graph graph, LinkedList<Edge> addEdges) {
-        LOGGER.info("Start GraphHandler getInsertionTDS");
         LinkedList<Edge> tds = new LinkedList<>();
 
         Hashtable<Integer, LinkedList<Integer>> adjMap = graph.getAdjMap();
         LinkedList<Edge> edgeSet = graph.getEdgeSet();
 
+        //the first edge of addEdges must be one of tds
         Edge firstEdge = addEdges.poll();
         tds.add(firstEdge);
+        adjMap = GraphHandler.insertEdgeToAdjMap(adjMap, firstEdge);
 
-        while (!addEdges.isEmpty()) {
-            Edge e_new = addEdges.poll();
-
-            adjMap = GraphHandler.insertEdgeToAdjMap(adjMap, e_new); //if insert the new edge
-            LinkedList<Edge> e_new_triangleEdgeSet = getTriangleEdges(adjMap, e_new);
+        if (addEdges.isEmpty()) {
+            return tds;
+        }
+        for (Edge e_new : addEdges) {
+            LinkedList<Edge> e_new_triangleEdgeSet = getTriangleEdges(adjMap, e_new); //new edges
 
             boolean tdsFlag = true;
             for (int i = 0; i < tds.size(); i++) {
                 Edge e_tds = tds.get(i);
                 LinkedList<Edge> e_tds_triangleEdgeSet = getTriangleEdges(adjMap, e_tds);
                 if (haveCommonElement(e_new_triangleEdgeSet, e_tds_triangleEdgeSet)) {
-                    adjMap = GraphHandler.removeEdgeFromAdjMap(adjMap, e_new); //insert first to judge, if not than remove
                     tdsFlag = false;
                     break;
                 }
             }
-            if(tdsFlag) tds.add(e_new);
+            if (tdsFlag) {
+                adjMap = GraphHandler.insertEdgeToAdjMap(adjMap, e_new); // insert the new edge
+                tds.add(e_new);
+            }
 
         }
         edgeSet.addAll(tds);
@@ -381,21 +382,28 @@ public class GraphHandler {
 
         Edge firstEdge = removeEdges.poll();
         tds.add(firstEdge);
+        adjMap = GraphHandler.removeEdgeFromAdjMap(adjMap, firstEdge);
 
         for (Edge e_new : removeEdges) {
             LinkedList<Edge> e_new_triangleEdgeSet = getTriangleEdges(adjMap, e_new);
 
-            for (Edge e_tds : tds) {
+            boolean tdsFlag = true;
+            for (int i = 0; i < tds.size(); i++) {
+                Edge e_tds = tds.get(i);
+
                 LinkedList<Edge> e_tds_triangleEdgeSet = getTriangleEdges(adjMap, e_tds);
 
-                if (!haveCommonElement(e_new_triangleEdgeSet, e_tds_triangleEdgeSet)) {
+                if (haveCommonElement(e_new_triangleEdgeSet, e_tds_triangleEdgeSet)) {
                     tds.offer(e_new);
-                    continue;
+                    tdsFlag = false;
+                    break;
                 }
             }
+            if(tdsFlag) tds.add(e_new);
         }
 
-        edgeSet.addAll(tds);
+        edgeSet.retainAll(tds);
+        adjMap = GraphHandler.removeEdgesFromAdjMap(adjMap, tds);
         removeEdges.removeAll(tds);
         return tds;
     }

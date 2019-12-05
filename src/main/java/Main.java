@@ -57,24 +57,20 @@ public class Main {
         adjMap = GraphHandler.removeEdgesFromAdjMap(adjMap, dynamicEdges);
         Graph restGraph = new Graph(adjMap, edgeSet);
 
-        //result
+        //result_full
         Result result_full = new TrussDecomp(fullGraph).run();
         result_full.setDatasetName(datasetName + "_full");
-        result_full.setDynamicEdges(0);
-        result_full.setThreadNums(0);
+        Hashtable<Edge, Integer> trussMap_full = (Hashtable<Edge, Integer>) result_full.getOutput();
 
+        //result_rest
         Result result_rest = new TrussDecomp(restGraph).run();
         result_rest.setDatasetName(datasetName + "_rest");
-        result_full.setDynamicEdges(0);
-        result_full.setThreadNums(0);
+        Hashtable<Edge, Integer> trussMap_rest = (Hashtable<Edge, Integer>) result_rest.getOutput();
 
-        //prepare for algorithms below
-        Hashtable<Edge, Integer> trussMap_full = (Hashtable<Edge, Integer>) result_full.getOutput();
-        Hashtable<Edge, Integer> trussMap_rest = (Hashtable<Edge, Integer>) result_full.getOutput();
-
-        Result result1 = null;
-        Result result2 = null;
-        Result result3 = null;
+        //result for below
+        Result result1;
+        Result result2;
+        Result result3;
 
         /**
          * Dynamic type
@@ -89,19 +85,24 @@ public class Main {
                  * MultiEdgesInsertion
                  */
                 LOGGER.info("==Algorithm 1: MultiEdgesInsertion========");
-                result1 = TCPIndex.edgesInsertion(restGraph, dynamicEdges, trussMap_full);
-                result2 = SupTruss.edgesInsertion(restGraph, dynamicEdges, trussMap_full);
-                result3 = Parallel.edgesInsertion(restGraph, dynamicEdges, trussMap_full, t);
-
-                result1.setDatasetName(datasetName);
-                result2.setDatasetName(datasetName);
-                result3.setDatasetName(datasetName);
-
-                result1.setDynamicEdges(dynamicEdgesSize);
-                result2.setDynamicEdges(dynamicEdgesSize);
-                result3.setDynamicEdges(dynamicEdgesSize);
-
+                Export.writeFile(result_rest);
                 Export.writeFile(result_full);
+
+                result1 = TCPIndex.edgesInsertion(restGraph, dynamicEdges, trussMap_rest);
+                result1.setDatasetName(datasetName);
+                result1.setDynamicEdges(order);
+                Export.writeFile(result1);
+
+                result2 = SupTruss.edgesInsertion(restGraph, dynamicEdges, trussMap_rest);
+                result2.setDatasetName(datasetName);
+                result2.setDynamicEdges(order);
+                Export.writeFile(result2);
+
+                result3 = Parallel.edgesInsertion(restGraph, dynamicEdges, trussMap_rest, t);
+                result3.setDatasetName(datasetName);
+                result3.setDynamicEdges(order);
+                result3.setThreadNums(t);
+                Export.writeFile(result3);
 
                 break;
             case 2:
@@ -109,15 +110,24 @@ public class Main {
                  * MultiEdgesInsertion
                  */
                 LOGGER.info("==Algorithm 2: MultiEdgesDeletion========");
-                result1 = TCPIndex.edgesDeletion(fullGraph, dynamicEdges, trussMap_rest);
-                result2 = SupTruss.edgesDeletion(fullGraph, dynamicEdges, trussMap_rest);
-                result3 = Parallel.edgesDeletion(fullGraph, dynamicEdges, trussMap_rest, t);
-
-                result1.setDatasetName(datasetName);
-                result2.setDatasetName(datasetName);
-                result3.setDatasetName(datasetName);
-
                 Export.writeFile(result_rest);
+
+                result1 = TCPIndex.edgesDeletion(fullGraph, dynamicEdges, trussMap_full);
+                result1.setDatasetName(datasetName);
+                result1.setDynamicEdges(order);
+                Export.writeFile(result1);
+
+                result2 = SupTruss.edgesDeletion(fullGraph, dynamicEdges, trussMap_full);
+                result2.setDatasetName(datasetName);
+                result2.setDynamicEdges(order);
+                Export.writeFile(result2);
+
+                result3 = Parallel.edgesDeletion(fullGraph, dynamicEdges, trussMap_full, t);
+                result3.setDatasetName(datasetName);
+                result3.setDynamicEdges(order);
+                result3.setThreadNums(t);
+                Export.writeFile(result3);
+
                 break;
             case 3:
                 LOGGER.info("==Algorithm 3: MultiVerticsInsertion========");
@@ -129,8 +139,5 @@ public class Main {
 
                 break;
         }
-        Export.writeFile(result1);
-        Export.writeFile(result2);
-        Export.writeFile(result3);
     }
 }

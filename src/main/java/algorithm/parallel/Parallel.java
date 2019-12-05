@@ -24,28 +24,29 @@ public class Parallel {
      */
     public static Result edgesInsertion(Graph graph, LinkedList<Edge> dynamicEdges, Hashtable<Edge, Integer> trussMap, int threadNum) {
         LOGGER.info("Start Parallel insert dynamicEdges, size=" + dynamicEdges.size());
+        LinkedList<Edge> addEdges = (LinkedList<Edge>) dynamicEdges.clone();
 
         long totalTime = 0;
         Result tempResult = null;
         int times = 0;
 
-        while (!dynamicEdges.isEmpty()) {
+        while (!addEdges.isEmpty()) {
             //get tds
-            LinkedList<Edge> tds = GraphHandler.getInsertionTDS(graph, dynamicEdges);
+            LinkedList<Edge> tds = GraphHandler.getInsertionTDS(graph, addEdges);
 
             //compute tds
             tempResult = edgesTDSInsertion(graph, tds, trussMap, threadNum);
             totalTime += tempResult.getTakenTime();
 
             //update dynamicEdges
-            dynamicEdges.removeAll(tds);
+            addEdges.removeAll(tds);
             times++;
         }
 
-        Result result = new Result(trussMap, totalTime, "ParaMultiEdgesInsertion");
+        Result result = new Result(trussMap, totalTime, "ParaInsertEdges");
         result.setTimes(times);
 
-        LOGGER.info("End Parallel insert dynamicEdges, size=" + dynamicEdges.size());
+        LOGGER.info("End Parallel insert dynamicEdges, size=" + addEdges.size());
         return result;
     }
 
@@ -59,7 +60,7 @@ public class Parallel {
      * @return
      */
     public static Result edgesTDSInsertion(Graph graph, LinkedList<Edge> tds, Hashtable<Edge, Integer> trussMap, int threadNum) {
-        LOGGER.info("Start parallel insert tds:" + tds.toString());
+        LOGGER.info("Start parallel insert tds, size=" + tds.size());
 
         Hashtable<Edge, Boolean> edgeVisitedMap = new Hashtable<>();
         for (Edge e : graph.getEdgeSet()) {
@@ -103,7 +104,7 @@ public class Parallel {
             times++;
         }
 
-        Result result = new Result(trussMap, totalTime, "ParaMultiEdgesInsertion");
+        Result result = new Result(trussMap, totalTime, "ParaDeleteEdges");
         result.setTimes(times);
 
         LOGGER.info("End Parallel insert dynamicEdges, size=" + dynamicEdges.size());

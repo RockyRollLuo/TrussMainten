@@ -86,7 +86,7 @@ public class RandomUtils {
      * @return
      */
     public static LinkedList<Edge> getRandomSetFromSet(LinkedList<Edge> edgeList, int nums) {
-        LOGGER.info("Start get random set from set - asu:" + nums + "/" + edgeList.size());
+        LOGGER.info("Start get random set from set - assume:" + nums + "/" + edgeList.size());
 
         int N = edgeList.size();
 
@@ -103,7 +103,7 @@ public class RandomUtils {
             }
         }
 
-        LOGGER.info("Start get random set from set - rel:" + dynamicEdges.size() + "/" + edgeList.size());
+        LOGGER.info("Start get random set from set - real:" + dynamicEdges.size() + "/" + edgeList.size());
         return dynamicEdges;
     }
 

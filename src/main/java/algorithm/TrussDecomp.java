@@ -23,7 +23,7 @@ public class TrussDecomp {
      * @return trussness of edges
      */
     public Result run() {
-        LOGGER.info("computing truss decomposition...");
+        LOGGER.info("Start truss decomposition...");
 
         long startTime = System.currentTimeMillis();
 
@@ -54,7 +54,7 @@ public class TrussDecomp {
 
         final int m = remainEdges.size();
         for (int t = 2; ; t++) {
-            LOGGER.info("Progress:" + (m - remainEdges.size()) + "/" + m);
+            LOGGER.info("Truss Decomposition Progress:" + (m - remainEdges.size()) + "/" + m);
 
             if (remainEdges.isEmpty())
                 break;
@@ -101,7 +101,7 @@ public class TrussDecomp {
         long endTime = System.currentTimeMillis();
         Result result = new Result(trussMap, endTime - startTime, "TrussDecomp");
 
-//        LOGGER.info("Truss decomp is computed...");
+        LOGGER.info("End truss decomposition");
         return result;
     }
 

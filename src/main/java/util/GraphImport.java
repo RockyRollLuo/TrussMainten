@@ -26,7 +26,7 @@ public class GraphImport {
     public static Graph load(String datasetName, String delim) throws IOException {
         String path = "datasets\\" + datasetName;
 
-        LOGGER.info("loading graph...: " + path);
+        LOGGER.info("Start loading graph: " + path);
 
         final Hashtable<Integer, LinkedList<Integer>> adjMap = new Hashtable<>();
 //        final HashSet<Edge> tempEdgeSet = new HashSet<>();
@@ -59,7 +59,7 @@ public class GraphImport {
             }
         }
 
-        LOGGER.info("graph was loaded: " + path);
+        LOGGER.info("End graph was loaded!");
 
         return new Graph(adjMap, edgeSet);
     }

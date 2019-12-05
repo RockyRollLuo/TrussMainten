@@ -176,7 +176,7 @@ public class ParaEdgeInsertion implements Runnable {
                             edgeVisitedMap.put(ac, true);
                             int s_ac = sMap.get(ac);
                             sMap.put(ac, s_ac + pSupMap.get(ac));
-                        } else if (trussMap.get(bc) == t_root && trussMap.get(ac) > t_root && sSupMap.get(bc) > t_root - 2 && !edgeElimainateMap.get(bc)) {
+                        } else if (trussMap.get(bc) == t_root && trussMap.get(ac) > t_root && sSupMap.get(bc) > t_root - 2 && !edgeVisitedMap.get(bc)) {
                             stack.push(bc);
                             edgeVisitedMap.put(bc, true);
                             int s_bc = sMap.get(bc);
@@ -235,14 +235,14 @@ public class ParaEdgeInsertion implements Runnable {
             Edge ac = new Edge(a, c);
             Edge bc = new Edge(b, c);
             if (Math.min(trussMap.get(ac), trussMap.get(bc)) >= t_root) {
-                if (trussMap.get(ac) == t_root - 2) {
+                if (trussMap.get(ac) == t_root) {
                     int s_ac = sMap.get(ac) - 1;
                     sMap.put(ac, s_ac);
                     if (s_ac == t_root - 2 && !edgeElimanateMap.get(ac)) {
                         eliminate(adjMap, trussMap, sMap, edgeElimanateMap, t_root, ac);
                     }
                 }
-                if (trussMap.get(bc) == t_root - 2) {
+                if (trussMap.get(bc) == t_root) {
                     int s_bc = sMap.get(bc) - 1;
                     sMap.put(ac, s_bc);
 

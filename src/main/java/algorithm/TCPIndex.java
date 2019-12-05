@@ -97,7 +97,6 @@ public class TCPIndex {
         return key_truss - 1;
     }
 
-
     /**
      * a list of edges insertion
      *
@@ -107,14 +106,15 @@ public class TCPIndex {
      */
     public static Result edgesInsertion(Graph graph, LinkedList<Edge> dynamicEdges, Hashtable<Edge, Integer> trussMap) {
         LOGGER.info("Start TCPTruss insert dynamicEdges, size=" + dynamicEdges.size());
+        LinkedList<Edge> addEdges = (LinkedList<Edge>) dynamicEdges.clone();
 
         long startTime = System.currentTimeMillis();
         Hashtable<Integer, LinkedList<Integer>> adjMap = graph.getAdjMap();
         LinkedList<Edge> edgeSet = graph.getEdgeSet();
         Result tempResult = null;
 
-        while (!dynamicEdges.isEmpty()) {
-            Edge e0 = dynamicEdges.poll();
+        while (!addEdges.isEmpty()) {
+            Edge e0 = addEdges.poll();
             tempResult = edgeInsertionRun(graph, trussMap, e0);
             //update graph
             adjMap = GraphHandler.insertEdgeToAdjMap(adjMap, e0);
@@ -123,7 +123,7 @@ public class TCPIndex {
             trussMap = (Hashtable<Edge, Integer>) tempResult.getOutput();
         }
 
-        LOGGER.info("End TCPTruss insert dynamicEdges, size=" + dynamicEdges.size());
+        LOGGER.info("End TCPTruss insert dynamicEdges, size=" + addEdges.size());
         return new Result(tempResult.getOutput(), System.currentTimeMillis() - startTime, "TCPInsertEdges");
     }
 
@@ -134,8 +134,6 @@ public class TCPIndex {
      * @return trussness of edges
      */
     public static Result edgeInsertionRun(Graph graph, Hashtable<Edge, Integer> trussMap, Edge e0) {
-
-        System.err.println("computing TCPIndex decomposition...");
 
         long startTime = System.currentTimeMillis();
 
@@ -233,7 +231,6 @@ public class TCPIndex {
             }
         }
 
-        System.err.println("Truss decomposition is computed...");
         long endTime = System.currentTimeMillis();
         return new Result(trussMap, endTime - startTime, "TCPIndex");
     }
@@ -248,14 +245,15 @@ public class TCPIndex {
      */
     public static Result edgesDeletion(Graph graph, LinkedList<Edge> dynamicEdges, Hashtable<Edge, Integer> trussMap) {
         LOGGER.info("Start TCPTruss deletion dynamicEdges, size=" + dynamicEdges.size());
+        LinkedList<Edge> addEdges = (LinkedList<Edge>) dynamicEdges.clone();
 
         long startTime = System.currentTimeMillis();
         Hashtable<Integer, LinkedList<Integer>> adjMap = graph.getAdjMap();
         LinkedList<Edge> edgeSet = graph.getEdgeSet();
-        Result tempResult = null;
+        Result tempResult;
 
-        while (!dynamicEdges.isEmpty()) {
-            Edge e0 = dynamicEdges.poll();
+        while (!addEdges.isEmpty()) {
+            Edge e0 = addEdges.poll();
             tempResult = edgeDeletionRun(graph, trussMap, e0);
             //update graph
             adjMap = GraphHandler.removeEdgeFromAdjMap(adjMap, e0);
@@ -263,7 +261,7 @@ public class TCPIndex {
             graph = new Graph(adjMap, edgeSet);
             trussMap = (Hashtable<Edge, Integer>) tempResult.getOutput();
         }
-        LOGGER.info("End TCPTruss insert dynamicEdges, size=" + dynamicEdges.size());
+        LOGGER.info("End TCPTruss insert dynamicEdges, size=" + addEdges.size());
         return new Result(trussMap, System.currentTimeMillis() - startTime, "TCPDeleteEdges");
     }
 
@@ -313,7 +311,7 @@ public class TCPIndex {
         Hashtable<Edge, Integer> s = new Hashtable<>();
         for (int k = k_max; k > 1; k--) {
             LinkedList<Edge> Lk = LkMap.get(k);
-
+            if (Lk == null) continue;
             Stack<Edge> Q = new Stack<>();
             Q.addAll(Lk);
             while (!Q.isEmpty()) {
@@ -368,7 +366,6 @@ public class TCPIndex {
             }
         }
 
-        System.err.println("Truss decomposition is computed...");
         long endTime = System.currentTimeMillis();
         return new Result(trussMap, endTime - startTime, "TCPIndex");
     }
