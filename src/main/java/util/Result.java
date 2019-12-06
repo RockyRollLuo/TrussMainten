@@ -5,10 +5,10 @@ public class Result {
     private Graph graph;
     private Object output;
     private long takenTime;
-    private int times;
+    private int times;  //tds iteration times
     private String algorithmName;
     private String datasetName;
-    private int dynamicEdges;
+    private int order;
     private int threadNums;
 
 
@@ -97,12 +97,12 @@ public class Result {
         this.datasetName = datasetName;
     }
 
-    public int getDynamicEdges() {
-        return dynamicEdges;
+    public int getOrder() {
+        return order;
     }
 
-    public void setDynamicEdges(int dynamicEdges) {
-        this.dynamicEdges = dynamicEdges;
+    public void setOrder(int order) {
+        this.order = order;
     }
 
     public int getThreadNums() {

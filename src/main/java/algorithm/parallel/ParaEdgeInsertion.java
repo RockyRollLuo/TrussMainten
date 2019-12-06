@@ -6,6 +6,7 @@ import util.Graph;
 import util.GraphHandler;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ParaEdgeInsertion implements Runnable {
     private static Logger LOGGER = Logger.getLogger(ParaEdgeInsertion.class);
@@ -14,7 +15,6 @@ public class ParaEdgeInsertion implements Runnable {
     private Graph graph;
     private Edge e0;
     private Hashtable<Edge, Integer> trussMap; //include edges in graph and e0
-
     private Hashtable<Edge, Boolean> edgeVisitedMap; //initial
 
     /**
@@ -210,6 +210,8 @@ public class ParaEdgeInsertion implements Runnable {
                 trussMap.put(e, t + 1);
             }
         }
+
+
         LOGGER.info("End run thread ParaEdgeInsertion e0:" + e0.toString());
     }
 

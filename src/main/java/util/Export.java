@@ -24,10 +24,10 @@ public class Export {
         String algorithmName = result.getAlgorithmName();
         String datasetName = result.getDatasetName();
         int times = result.getTimes();
-        int dynamicEdges = result.getDynamicEdges();
+        int order = result.getOrder();
         int threadNums = result.getThreadNums();
 
-        String fileName="outputs\\"+algorithmName+"_"+datasetName+"_D"+dynamicEdges+"_T"+threadNums;
+        String fileName="outputs\\"+algorithmName+"_"+datasetName+"_D"+order+"_T"+threadNums;
 
         LOGGER.info("Exporting graph... ");
 
@@ -39,7 +39,7 @@ public class Export {
         bw.write("#times:"+times);
         bw.newLine();
 
-        bw.write("#dynamic edges:" + (int)Math.pow(2,dynamicEdges));
+        bw.write("#dynamic edges:" + (int)Math.pow(10,order));
         bw.newLine();
 
         bw.write("#threadNums:" + threadNums); //only useful for Parallel way

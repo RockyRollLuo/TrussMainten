@@ -26,10 +26,10 @@ public class Main {
     public static int order = 1;
 
     @Option(abbr = 'a', usage = "algorithm type, 0:TrussDecomp, 1:MultiEdgesInsertion, 2:MultiEdgesDeletion, 3:MultiVerticesInsertion, 4:MultiVerticesDeletion")
-    public static int a = 0;
+    public static int algorithmType = 0;
 
     @Option(abbr = 't', usage = "max thread number")
-    public static int t = 1;
+    public static int threadNum = 1;
 
 
     public static void main(String[] args) throws IOException {
@@ -39,15 +39,15 @@ public class Main {
 
         LOGGER.info("Basic information:");
         System.err.println("Dynamic edges:" + (int) Math.pow(2, order));
-        System.err.println("Algorithm type:" + a);
-        System.err.println("Thread number:" + t);
+        System.err.println("Algorithm type:" + algorithmType);
+        System.err.println("Thread number:" + threadNum);
 
         //read graph
         String datasetName = args[0];
         Graph fullGraph = GraphImport.load(datasetName, delim);
 
         //dynamic edges 2^d
-        int dynamicEdgesSize = (int) Math.pow(2, order);
+        int dynamicEdgesSize = (int) Math.pow(10, order);
         LinkedList<Edge> dynamicEdges = RandomUtils.getRandomSetFromSet(fullGraph.getEdgeSet(), dynamicEdgesSize);
 
         //Graph
@@ -75,7 +75,7 @@ public class Main {
         /**
          * Dynamic type
          */
-        switch (a) {
+        switch (algorithmType) {
             case 0:
                 LOGGER.info("==Algorithm 0: truss decomposition========");
                 Export.writeFile(result_full);
@@ -88,20 +88,20 @@ public class Main {
                 Export.writeFile(result_rest);
                 Export.writeFile(result_full);
 
-                result1 = TCPIndex.edgesInsertion(restGraph, dynamicEdges, trussMap_rest);
-                result1.setDatasetName(datasetName);
-                result1.setDynamicEdges(order);
-                Export.writeFile(result1);
+//                result1 = TCPIndex.edgesInsertion(restGraph, dynamicEdges, trussMap_rest);
+//                result1.setDatasetName(datasetName);
+//                result1.setDynamicEdges(order);
+//                Export.writeFile(result1);
 
-                result2 = SupTruss.edgesInsertion(restGraph, dynamicEdges, trussMap_rest);
-                result2.setDatasetName(datasetName);
-                result2.setDynamicEdges(order);
-                Export.writeFile(result2);
+//                result2 = SupTruss.edgesInsertion(restGraph, dynamicEdges, trussMap_rest);
+//                result2.setDatasetName(datasetName);
+//                result2.setDynamicEdges(order);
+//                Export.writeFile(result2);
 
-                result3 = Parallel.edgesInsertion(restGraph, dynamicEdges, trussMap_rest, t);
+                result3 = Parallel.edgesInsertion(restGraph, dynamicEdges, trussMap_rest, threadNum);
                 result3.setDatasetName(datasetName);
-                result3.setDynamicEdges(order);
-                result3.setThreadNums(t);
+                result3.setOrder(order);
+                result3.setThreadNums(threadNum);
                 Export.writeFile(result3);
 
                 break;
@@ -114,18 +114,18 @@ public class Main {
 
                 result1 = TCPIndex.edgesDeletion(fullGraph, dynamicEdges, trussMap_full);
                 result1.setDatasetName(datasetName);
-                result1.setDynamicEdges(order);
+                result1.setOrder(order);
                 Export.writeFile(result1);
 
                 result2 = SupTruss.edgesDeletion(fullGraph, dynamicEdges, trussMap_full);
                 result2.setDatasetName(datasetName);
-                result2.setDynamicEdges(order);
+                result2.setOrder(order);
                 Export.writeFile(result2);
 
-                result3 = Parallel.edgesDeletion(fullGraph, dynamicEdges, trussMap_full, t);
+                result3 = Parallel.edgesDeletion(fullGraph, dynamicEdges, trussMap_full, threadNum);
                 result3.setDatasetName(datasetName);
-                result3.setDynamicEdges(order);
-                result3.setThreadNums(t);
+                result3.setOrder(order);
+                result3.setThreadNums(threadNum);
                 Export.writeFile(result3);
 
                 break;

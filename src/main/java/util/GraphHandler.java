@@ -332,36 +332,36 @@ public class GraphHandler {
     public static LinkedList<Edge> getInsertionTDS(Graph graph, LinkedList<Edge> addEdges) {
         LinkedList<Edge> tds = new LinkedList<>();
 
-        Hashtable<Integer, LinkedList<Integer>> adjMap = graph.getAdjMap();
+        Hashtable<Integer, LinkedList<Integer>> tempAdjMap = GraphHandler.deepCloneAdjMap(graph.getAdjMap());
         LinkedList<Edge> edgeSet = graph.getEdgeSet();
 
         //the first edge of addEdges must be one of tds
         Edge firstEdge = addEdges.poll();
         tds.add(firstEdge);
-        adjMap = GraphHandler.insertEdgeToAdjMap(adjMap, firstEdge);
+        tempAdjMap = GraphHandler.insertEdgeToAdjMap(tempAdjMap, firstEdge);
 
         if (addEdges.isEmpty()) {
             return tds;
         }
         for (Edge e_new : addEdges) {
-            LinkedList<Edge> e_new_triangleEdgeSet = getTriangleEdges(adjMap, e_new); //new edges
+            tempAdjMap = GraphHandler.insertEdgeToAdjMap(tempAdjMap, e_new);
+            LinkedList<Edge> e_new_triangleEdgeSet = getTriangleEdges(tempAdjMap, e_new); //new edges
 
             boolean tdsFlag = true;
             for (int i = 0; i < tds.size(); i++) {
                 Edge e_tds = tds.get(i);
-                LinkedList<Edge> e_tds_triangleEdgeSet = getTriangleEdges(adjMap, e_tds);
+                LinkedList<Edge> e_tds_triangleEdgeSet = getTriangleEdges(tempAdjMap, e_tds);
                 if (haveCommonElement(e_new_triangleEdgeSet, e_tds_triangleEdgeSet)) {
+                    tempAdjMap = GraphHandler.removeEdgeFromAdjMap(tempAdjMap, e_new);
                     tdsFlag = false;
                     break;
                 }
             }
             if (tdsFlag) {
-                adjMap = GraphHandler.insertEdgeToAdjMap(adjMap, e_new); // insert the new edge
                 tds.add(e_new);
             }
 
         }
-        edgeSet.addAll(tds);
         addEdges.removeAll(tds);
         return tds;
     }
@@ -407,6 +407,7 @@ public class GraphHandler {
         removeEdges.removeAll(tds);
         return tds;
     }
+
 
 
 }

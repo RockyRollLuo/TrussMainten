@@ -7,8 +7,10 @@ import util.Graph;
 import util.GraphHandler;
 import util.Result;
 
+import javax.sound.sampled.Line;
 import java.util.Hashtable;
 import java.util.LinkedList;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -17,6 +19,7 @@ public class Parallel {
 
     /**
      * insert a set of edges, tds parallel
+     *
      * @param graph
      * @param dynamicEdges
      * @param threadNum
@@ -26,6 +29,9 @@ public class Parallel {
         LOGGER.info("Start Parallel insert dynamicEdges, size=" + dynamicEdges.size());
         LinkedList<Edge> addEdges = (LinkedList<Edge>) dynamicEdges.clone();
 
+        Hashtable<Integer, LinkedList<Integer>> adjMap = graph.getAdjMap();
+        LinkedList<Edge> edgeSet = graph.getEdgeSet();
+
         long totalTime = 0;
         Result tempResult = null;
         int times = 0;
@@ -34,12 +40,16 @@ public class Parallel {
             //get tds
             LinkedList<Edge> tds = GraphHandler.getInsertionTDS(graph, addEdges);
 
-            //compute tds
+            //insert tds
             tempResult = edgesTDSInsertion(graph, tds, trussMap, threadNum);
             totalTime += tempResult.getTakenTime();
 
-            //update dynamicEdges
-            addEdges.removeAll(tds);
+            //update graph
+            edgeSet.addAll(tds);
+            adjMap = GraphHandler.insertEdgesToAdjMap(adjMap, tds);
+            graph = new Graph(adjMap, edgeSet);
+            trussMap = (Hashtable<Edge, Integer>) tempResult.getOutput();
+
             times++;
         }
 
@@ -53,6 +63,7 @@ public class Parallel {
 
     /**
      * insert a tds to a graph
+     *
      * @param graph
      * @param tds
      * @param trussMap
@@ -73,8 +84,10 @@ public class Parallel {
             threadPool.submit(new ParaEdgeInsertion(graph, e, trussMap, edgeVisitedMap));
         }
         threadPool.shutdown();
-        LOGGER.info("End parallel insert tds");
-        return new Result(trussMap, startTime - System.currentTimeMillis());
+        long endTime = System.currentTimeMillis();
+
+        LOGGER.info("End parallel insert tds, size=" + tds.size());
+        return new Result(trussMap, endTime - startTime);
     }
 
 
@@ -88,7 +101,7 @@ public class Parallel {
     public static Result edgesDeletion(Graph graph, LinkedList<Edge> dynamicEdges, Hashtable<Edge, Integer> trussMap, int threadNum) {
         LOGGER.info("Start Parallel delete dynamicEdges, size=" + dynamicEdges.size());
         long totalTime = 0;
-        Result tempResult = null;
+        Result tempResult;
         int times = 0;
 
         while (!dynamicEdges.isEmpty()) {
@@ -114,6 +127,7 @@ public class Parallel {
 
     /**
      * delete a tds to from graph
+     *
      * @param graph
      * @param tds
      * @param trussMap
