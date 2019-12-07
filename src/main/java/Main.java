@@ -13,20 +13,17 @@ import java.util.LinkedList;
 public class Main {
     private static Logger LOGGER = Logger.getLogger(Main.class);
 
-    @Option(abbr = 'r', usage = "Print the result.")
-    public static boolean printResult = true;
-
-    @Option(abbr = 'p', usage = "print the progress")
-    public static int debug = 1;
-
     @Option(abbr = 's', usage = "Separate delimiter,0:tab,1:space,2:comma")
     public static String delim = "\t";
 
+    @Option(abbr = 'd', usage = "dynamic type, 0:static TrussDecomp, 1:MultiEdgesInsertion, 2:MultiEdgesDeletion")
+    public static int dynamicType = 0;
+
+    @Option(abbr = 'a', usage = "algorithm type, 0:TCPInde, 1:SupTruss, 2:ParaTruss")
+    public static int algorithmType = 0;
+
     @Option(abbr = 'o', usage = "orders of magnitude,number=2^o,o=0,1,2,3,4,5,6")
     public static int order = 1;
-
-    @Option(abbr = 'a', usage = "algorithm type, 0:TrussDecomp, 1:MultiEdgesInsertion, 2:MultiEdgesDeletion, 3:MultiVerticesInsertion, 4:MultiVerticesDeletion")
-    public static int algorithmType = 0;
 
     @Option(abbr = 't', usage = "max thread number")
     public static int threadNum = 1;
@@ -39,6 +36,7 @@ public class Main {
 
         LOGGER.info("Basic information:");
         System.err.println("Dynamic edges:" + (int) Math.pow(2, order));
+        System.err.println("Dynamic type:" + dynamicType);
         System.err.println("Algorithm type:" + algorithmType);
         System.err.println("Thread number:" + threadNum);
 
@@ -75,41 +73,52 @@ public class Main {
         /**
          * Dynamic type
          */
-        switch (algorithmType) {
+        switch (dynamicType) {
             case 0:
-                LOGGER.info("==Algorithm 0: truss decomposition========");
+                LOGGER.info("==dynamicType 0: truss decomposition========");
                 Export.writeFile(result_full);
                 break;
             case 1:
                 /**
                  * MultiEdgesInsertion
                  */
-                LOGGER.info("==Algorithm 1: MultiEdgesInsertion========");
+                LOGGER.info("==dynamicType 1: MultiEdgesInsertion========");
                 Export.writeFile(result_rest);
                 Export.writeFile(result_full);
 
-//                result1 = TCPIndex.edgesInsertion(restGraph, dynamicEdges, trussMap_rest);
-//                result1.setDatasetName(datasetName);
-//                result1.setDynamicEdges(order);
-//                Export.writeFile(result1);
+                switch (algorithmType) {
+                    case 0:
+                        result1 = TCPIndex.edgesInsertion(restGraph, dynamicEdges, trussMap_rest);
+                        result1.setDatasetName(datasetName);
+                        result1.setOrder(order);
+                        Export.writeFile(result1);
+                        break;
+                    case 1:
+                        result2 = SupTruss.edgesInsertion(restGraph, dynamicEdges, trussMap_rest);
+                        result2.setDatasetName(datasetName);
+                        result2.setOrder(order);
+                        Export.writeFile(result2);
+                        break;
+                    case 2:
+                        result3 = Parallel.edgesInsertion(restGraph, dynamicEdges, trussMap_rest, threadNum);
+                        result3.setDatasetName(datasetName);
+                        result3.setOrder(order);
+                        result3.setThreadNums(threadNum);
+                        Export.writeFile(result3);
+                        break;
+                }
 
-//                result2 = SupTruss.edgesInsertion(restGraph, dynamicEdges, trussMap_rest);
-//                result2.setDatasetName(datasetName);
-//                result2.setDynamicEdges(order);
-//                Export.writeFile(result2);
 
-                result3 = Parallel.edgesInsertion(restGraph, dynamicEdges, trussMap_rest, threadNum);
-                result3.setDatasetName(datasetName);
-                result3.setOrder(order);
-                result3.setThreadNums(threadNum);
-                Export.writeFile(result3);
+
+
+
 
                 break;
             case 2:
                 /**
                  * MultiEdgesInsertion
                  */
-                LOGGER.info("==Algorithm 2: MultiEdgesDeletion========");
+                LOGGER.info("==dynamicType 2: MultiEdgesDeletion========");
                 Export.writeFile(result_rest);
 
                 result1 = TCPIndex.edgesDeletion(fullGraph, dynamicEdges, trussMap_full);
@@ -128,12 +137,6 @@ public class Main {
                 result3.setThreadNums(threadNum);
                 Export.writeFile(result3);
 
-                break;
-            case 3:
-                LOGGER.info("==Algorithm 3: MultiVerticsInsertion========");
-                break;
-            case 4:
-                LOGGER.info("==Algorithm 4: MultiVerticsDeletion========");
                 break;
             default:
 

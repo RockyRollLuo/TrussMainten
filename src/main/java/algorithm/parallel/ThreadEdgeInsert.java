@@ -6,23 +6,20 @@ import util.Graph;
 
 import java.util.*;
 
-public class ParaEdgeInsertion implements Runnable {
-    private static Logger LOGGER = Logger.getLogger(ParaEdgeInsertion.class);
-
+public class ThreadEdgeInsert implements Runnable {
+    private static Logger LOGGER = Logger.getLogger(ThreadEdgeInsert.class);
 
     private Graph graph;
     private Edge e0;
     private Hashtable<Edge, Integer> trussMap; //include edges in graph and e0
-    private Hashtable<Edge, Boolean> edgeVisitedMap; //initial
 
     /**
      * constructor
      */
-    public ParaEdgeInsertion(Graph graph, Edge e0, Hashtable<Edge, Integer> trussMap, Hashtable<Edge, Boolean> edgeVisitedMap) {
+    public ThreadEdgeInsert(Graph graph, Edge e0, Hashtable<Edge, Integer> trussMap) {
         this.graph = graph;
         this.e0 = e0;
         this.trussMap = trussMap;
-        this.edgeVisitedMap = edgeVisitedMap;
     }
 
     @Override
@@ -39,7 +36,6 @@ public class ParaEdgeInsertion implements Runnable {
         edgeSet.add(e0);
         set1_e0.add(v2_e0);
         set2_e0.add(v1_e0);
-        edgeVisitedMap.put(e0, false);
 
         //2.LowerBound & UpperBound
         LinkedList<Integer> set3_e0 = (LinkedList<Integer>) set1_e0.clone();
@@ -49,8 +45,8 @@ public class ParaEdgeInsertion implements Runnable {
         for (int w : set3_e0) {
             Edge e1 = new Edge(v1_e0, w);
             Edge e2 = new Edge(v2_e0, w);
-            int t_e1 = (trussMap.get(e1) == null ? 1 : trussMap.get(e1));
-            int t_e2 = (trussMap.get(e2) == null ? 1 : trussMap.get(e1));
+            int t_e1 = (trussMap.get(e1) == null ? 0 : trussMap.get(e1));
+            int t_e2 = (trussMap.get(e2) == null ? 0 : trussMap.get(e1));
             commonTrussList.add(Math.min(t_e1, t_e2));
         }
 
@@ -144,9 +140,11 @@ public class ParaEdgeInsertion implements Runnable {
 
         //6.Lazy initial
         Hashtable<Edge, Boolean> edgeElimainateMap = new Hashtable<>();
+        Hashtable<Edge, Boolean> edgeVisitedMap = new Hashtable<>();
         Hashtable<Edge, Integer> sMap = new Hashtable<>();
         for (Edge e : edgeSet) {
             edgeElimainateMap.put(e, false);
+            edgeVisitedMap.put(e, false);
             sMap.put(e, 0);
         }
 

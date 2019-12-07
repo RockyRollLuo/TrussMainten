@@ -333,7 +333,6 @@ public class GraphHandler {
         LinkedList<Edge> tds = new LinkedList<>();
 
         Hashtable<Integer, LinkedList<Integer>> tempAdjMap = GraphHandler.deepCloneAdjMap(graph.getAdjMap());
-        LinkedList<Edge> edgeSet = graph.getEdgeSet();
 
         //the first edge of addEdges must be one of tds
         Edge firstEdge = addEdges.poll();
