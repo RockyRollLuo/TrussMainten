@@ -6,6 +6,7 @@ import util.Graph;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Stack;
+import java.util.concurrent.CountDownLatch;
 
 public class ThreadEdgeDelete implements Runnable {
 
@@ -50,13 +51,15 @@ public class ThreadEdgeDelete implements Runnable {
         }
 
         //update graph
-        edgeSet.add(e0);
+        edgeSet.remove(e0);
         set1_e0.remove(v2_e0);
         set2_e0.remove(v1_e0);
+        trussMap.remove(e0);
 
         //compute local sSupMap
         Hashtable<Edge, Integer> sSupMap = new Hashtable<>();
-        for (Edge e : edgeSet) {
+        for (int i = 0; i < edgeSet.size(); i++) {
+            Edge e = edgeSet.get(i);
             Integer v1_e = e.getV1();
             Integer v2_e = e.getV2();
             LinkedList<Integer> set1_e = adjMap.get(v1_e);
@@ -74,40 +77,13 @@ public class ThreadEdgeDelete implements Runnable {
             sSupMap.put(e, ss);
         }
 
-        //compute local pSupMap
-        Hashtable<Edge, Integer> pSupMap = new Hashtable<>();
-        for (Edge e : edgeSet) {
-            Integer v1_e = e.getV1();
-            Integer v2_e = e.getV2();
-            LinkedList<Integer> set1_e = adjMap.get(v1_e);
-            LinkedList<Integer> set2_e = adjMap.get(v2_e);
-            LinkedList<Integer> set3_e = (LinkedList<Integer>) set1_e.clone();
-            set3_e.retainAll(set2_e);
-
-            int ps = 0;
-            for (int v3 : set3_e) {
-                Edge e1 = new Edge(v1_e, v3);
-                Edge e2 = new Edge(v2_e, v3);
-                int t0 = trussMap.get(e);
-                int t1 = trussMap.get(e1);
-                int t2 = trussMap.get(e2);
-                int sSup1 = sSupMap.get(e1);
-                int sSup2 = sSupMap.get(e2);
-
-                if (t1 > t0 && t2 > t0) ps++;
-                else if (t1 == t0 && t2 > t0 && sSup1 > t0 - 2) ps++;
-                else if (t2 == t0 && t1 > t0 && sSup2 > t0 - 2) ps++;
-                else if (t1 == t0 && t2 == t0 && sSup1 > t0 - 2 && sSup2 > t0 - 2) ps++;
-            }
-            pSupMap.put(e, ps);
-        }
-
 
         //Lazy initial
         Hashtable<Edge, Boolean> edgeElimainateMap = new Hashtable<>();
         Hashtable<Edge, Boolean> edgeVisitedMap = new Hashtable<>();
         Hashtable<Edge, Integer> sMap = new Hashtable<>();
-        for (Edge e : edgeSet) {
+        for (int i = 0; i < edgeSet.size(); i++) {
+            Edge e = edgeSet.get(i);
             edgeElimainateMap.put(e, false);
             edgeVisitedMap.put(e, false);
             sMap.put(e, 0);
@@ -116,7 +92,7 @@ public class ThreadEdgeDelete implements Runnable {
         //Traversal
         for (Edge e_root : promoteEdgeSet) {
             int t_root = trussMap.get(e_root);
-            sMap.put(e_root, pSupMap.get(e_root));
+            sMap.put(e_root, sSupMap.get(e_root));
             edgeVisitedMap.put(e_root, true);
 
             Stack<Edge> stack = new Stack<>();
@@ -166,11 +142,15 @@ public class ThreadEdgeDelete implements Runnable {
             }
         }
 
-        for (Edge e : edgeSet) {
-            if (edgeVisitedMap.get(e) && !edgeElimainateMap.get(e)) {
-                int t = trussMap.get(e);
-                trussMap.put(e, t - 1);
+        for (int i = 0; i < edgeSet.size(); i++) {
+            Edge e = edgeSet.get(i);
+            if (edgeVisitedMap.get(e) != null) {
+                if (edgeVisitedMap.get(e) && edgeElimainateMap.get(e)) {
+                    int t = trussMap.get(e);
+                    trussMap.put(e, t - 1);
+                }
             }
+
         }
     }
 

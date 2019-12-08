@@ -1,13 +1,11 @@
 package algorithm.parallel;
 
-import algorithm.TrussDecomp;
 import org.apache.log4j.Logger;
 import util.Edge;
 import util.Graph;
 import util.GraphHandler;
 import util.Result;
 
-import javax.sound.sampled.Line;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.concurrent.*;
@@ -27,11 +25,8 @@ public class Parallel {
         LOGGER.info("Start Parallel insert dynamicEdges, size=" + dynamicEdges.size());
         LinkedList<Edge> addEdges = (LinkedList<Edge>) dynamicEdges.clone();
 
-        Hashtable<Integer, LinkedList<Integer>> adjMap = graph.getAdjMap();
-        LinkedList<Edge> edgeSet = graph.getEdgeSet();
-
         long totalTime = 0;
-        Result tempResult = null;
+        Result tempResult;
         int times = 0;
 
         while (!addEdges.isEmpty()) {
@@ -69,33 +64,29 @@ public class Parallel {
     public static Result edgesTDSInsertion(Graph graph, LinkedList<Edge> tds, Hashtable<Edge, Integer> trussMap, int threadNum) {
         LOGGER.info("Start parallel insert tds, size=" + tds.size());
 
-
-
         long startTime = System.currentTimeMillis();
 
         /**
-         * method 1:thread pool
+         * thread pool
          */
-        BlockingQueue<Runnable> queue = new ArrayBlockingQueue<>(512);
-        RejectedExecutionHandler policy = new ThreadPoolExecutor.AbortPolicy();
-        ExecutorService executorService = new ThreadPoolExecutor(threadNum, threadNum, 0, TimeUnit.SECONDS, queue, policy);
+//        ExecutorService executorService = new ThreadPoolExecutor(threadNum, threadNum, 10, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>(), new ThreadPoolExecutor.AbortPolicy());
+        ExecutorService executorService = Executors.newFixedThreadPool(threadNum);
         for (Edge e : tds) {
             executorService.submit(new ThreadEdgeInsert(graph, e, trussMap));
         }
         executorService.shutdown();
 
         /**
-         * iterate thread run, no thread pool
+         * wait for all thread terminated
          */
-//        for (Edge e : tds) {
-//            new ThreadEdgeInsert(graph, e, trussMap).run();
-//        }
-
+        while (true) {
+            if (executorService.isTerminated()) break;
+        }
         long endTime = System.currentTimeMillis();
 
         LOGGER.info("End parallel insert tds, size=" + tds.size());
 
-        Result result=new Result(trussMap, endTime - startTime);
+        Result result = new Result(trussMap, endTime - startTime);
         result.setGraph(graph);
         return result;
     }
@@ -110,22 +101,26 @@ public class Parallel {
      * @return
      */
     public static Result edgesDeletion(Graph graph, LinkedList<Edge> dynamicEdges, Hashtable<Edge, Integer> trussMap, int threadNum) {
-        //todo:change as insertion
         LOGGER.info("Start Parallel delete dynamicEdges, size=" + dynamicEdges.size());
+
+        LinkedList<Edge> addEdges = (LinkedList<Edge>) dynamicEdges.clone();
+
         long totalTime = 0;
         Result tempResult;
         int times = 0;
 
-        while (!dynamicEdges.isEmpty()) {
+        while (!addEdges.isEmpty()) {
             //get tds
-            LinkedList<Edge> tds = GraphHandler.getDeletionTDS(graph, dynamicEdges);
+            LinkedList<Edge> tds = GraphHandler.getDeletionTDS(graph, addEdges);
 
             //compute tds
             tempResult = edgesTDSDeletion(graph, tds, trussMap, threadNum);
             totalTime += tempResult.getTakenTime();
 
             //update dynamicEdges
-            dynamicEdges.removeAll(tds);
+            graph = tempResult.getGraph();
+            trussMap = (Hashtable<Edge, Integer>) tempResult.getOutput();
+
             times++;
         }
 
@@ -147,20 +142,30 @@ public class Parallel {
      * @return
      */
     public static Result edgesTDSDeletion(Graph graph, LinkedList<Edge> tds, Hashtable<Edge, Integer> trussMap, int threadNum) {
-        //todo: change as inseriton
-        Hashtable<Edge, Boolean> edgeVisitedMap = new Hashtable<>();
-        for (Edge e : graph.getEdgeSet()) {
-            edgeVisitedMap.put(e, false);
-        }
+        LOGGER.info("Start Parallel delete tds, size=" + tds.size());
 
         long startTime = System.currentTimeMillis();
-        ExecutorService threadPool = Executors.newFixedThreadPool(threadNum);
+
+//        ExecutorService executorService = new ThreadPoolExecutor(threadNum, threadNum, 10, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>(), new ThreadPoolExecutor.AbortPolicy());
+        ExecutorService executorService = Executors.newFixedThreadPool(threadNum);
         for (Edge e : tds) {
-            threadPool.submit(new ParaEdgeDeletion(graph, e, trussMap, edgeVisitedMap));
+            executorService.submit(new ThreadEdgeDelete(graph, e, trussMap));
         }
-        threadPool.shutdown();
-        return new Result(trussMap, startTime - System.currentTimeMillis());
+        executorService.shutdown();
+
+        /**
+         * wait for all thread terminated
+         */
+        while (true) {
+            if (executorService.isTerminated()) break;
+        }
+        long endTime = System.currentTimeMillis();
+
+        LOGGER.info("End Parallel delete tds, size=" + tds.size());
+
+        Result result = new Result(trussMap, endTime - startTime);
+        result.setGraph(graph);
+
+        return result;
     }
-
-
 }

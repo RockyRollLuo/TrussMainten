@@ -48,14 +48,18 @@ public class GraphImport {
 
                 if (v1 == v2) continue;
 
-                if (v1 < v2) edgeSet.add(new Edge(v1, v2));
-                else edgeSet.add(new Edge(v2, v1));
+                Edge e = v1 < v2 ? new Edge(v1, v2) : new Edge(v2, v1);
 
-                if (!adjMap.containsKey(v1)) adjMap.put(v1, new LinkedList());
-                adjMap.get(v1).add(v2);
+                if (!edgeSet.contains(e)) {
+                    edgeSet.add(e);
 
-                if (!adjMap.containsKey(v2)) adjMap.put(v2, new LinkedList());
-                adjMap.get(v2).add(v1);
+                    if (!adjMap.containsKey(v1)) adjMap.put(v1, new LinkedList());
+                    adjMap.get(v1).add(v2);
+
+                    if (!adjMap.containsKey(v2)) adjMap.put(v2, new LinkedList());
+                    adjMap.get(v2).add(v1);
+                }
+
             }
         }
 

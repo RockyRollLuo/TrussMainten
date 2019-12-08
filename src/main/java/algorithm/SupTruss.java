@@ -182,7 +182,6 @@ public class SupTruss {
         LOGGER.info("Start SupTruss insert dynamicEdges, size=" + dynamicEdges.size());
         LinkedList<Edge> addEdges = (LinkedList<Edge>) dynamicEdges.clone();
 
-        Hashtable<Integer, LinkedList<Integer>> adjMap = graph.getAdjMap();
         long totalTime = 0;
         int edgeNum = addEdges.size();
         Result tempResult;
@@ -191,7 +190,7 @@ public class SupTruss {
         while (!addEdges.isEmpty()) {
             LOGGER.info("SupTruss insert edges progress: " + (edgeNum - addEdges.size()) + "/" + edgeNum + "...");
 
-            LinkedList<Edge> tds = getInsertionTDS(adjMap, addEdges);
+            LinkedList<Edge> tds = GraphHandler.getInsertionTDS(graph, addEdges);
 
             //compute tds
             tempResult = edgeTDSInsertion(graph, tds, trussMap);
@@ -515,19 +514,21 @@ public class SupTruss {
      */
     public static Result edgesDeletion(Graph graph, LinkedList<Edge> dynamicEdges, Hashtable<Edge, Integer> trussMap) {
         LOGGER.info("Start SupTruss delete dynamicEdges, size=" + dynamicEdges.size());
-        LinkedList<Edge> addEdges = (LinkedList<Edge>) dynamicEdges.clone();
+        LinkedList<Edge> removeEdges = (LinkedList<Edge>) dynamicEdges.clone();
 
         int edgeNum = dynamicEdges.size();
         long totalTime = 0;
-        Result tempResult = null;
+        Result tempResult;
         int times = 0;
 
-        while (!addEdges.isEmpty()) {
-            LOGGER.info("SupTruss insert edges progress: " + (edgeNum - addEdges.size()) + "/" + edgeNum + "...");
-            LinkedList<Edge> tds = GraphHandler.getDeletionTDS(graph, addEdges);
+        while (!removeEdges.isEmpty()) {
+            LOGGER.info("SupTruss insert edges progress: " + (edgeNum - removeEdges.size()) + "/" + edgeNum + "...");
+            LinkedList<Edge> tds = GraphHandler.getDeletionTDS(graph, removeEdges);
 
             //compute tds
             tempResult = edgeTDSDeletion(graph, tds, trussMap);
+
+            //cumulative time
             totalTime += tempResult.getTakenTime();
 
             //update graph
@@ -535,15 +536,13 @@ public class SupTruss {
             trussMap = (Hashtable<Edge, Integer>) tempResult.getOutput();
 
             //update dynamicEdges
-            addEdges.removeAll(tds);
-
             times++;
         }
 
-        Result result = new Result(tempResult.getOutput(), totalTime, "SupDeleteEdges");
+        Result result = new Result(trussMap, totalTime, "SupDeleteEdges");
         result.setTimes(times);
 
-        LOGGER.info("End SupTruss delete dynamicEdges, size=" + addEdges.size());
+        LOGGER.info("End SupTruss delete dynamicEdges, size=" + removeEdges.size());
         return result;
     }
 
@@ -556,20 +555,18 @@ public class SupTruss {
      * @return
      */
     public static Result edgeTDSDeletion(Graph graph, LinkedList<Edge> tds, Hashtable<Edge, Integer> trussMap) {
-        LOGGER.info("SupTruss deletion tds:" + tds.toString());
+        LOGGER.info("SupTruss deletion tds, size:" + tds.size());
 
-        Hashtable<Integer, LinkedList<Integer>> oldAdjMap = graph.getAdjMap();
-        LinkedList<Edge> oldEdgeSet = graph.getEdgeSet();
+        Hashtable<Integer, LinkedList<Integer>> adjMap = graph.getAdjMap();
+        LinkedList<Edge> edgeSet = graph.getEdgeSet();
 
         //Construct new graph
-        LinkedList<Edge> newEdgeSet = (LinkedList<Edge>) oldEdgeSet.clone();
-        newEdgeSet.remove(tds);
-        Hashtable<Integer, LinkedList<Integer>> newAdjMap = GraphHandler.deepCloneAdjMap(oldAdjMap);
-        newAdjMap = GraphHandler.removeEdgesFromAdjMap(oldAdjMap, tds);
-        Graph newGraph = new Graph(newAdjMap, newEdgeSet);
-
+        edgeSet.removeAll(tds);
+        adjMap = GraphHandler.removeEdgesFromAdjMap(adjMap, tds);
+        Graph newGraph = new Graph(adjMap, edgeSet);
 
         /**
+         /**
          * start main processing
          */
         long startTime = System.currentTimeMillis();
@@ -577,14 +574,11 @@ public class SupTruss {
         //compute SustainSupportMap
         Hashtable<Edge, Integer> sSupMap = GraphHandler.computeSustainSupportMap(newGraph, trussMap);
 
-        //compute PivotalSupportMap
-        Hashtable<Edge, Integer> pSupMap = GraphHandler.computePivotalSupportMap(newGraph, trussMap, sSupMap);
-
         //lazy initial
         Hashtable<Edge, Boolean> edgeVisitedMap = new Hashtable<>();
         Hashtable<Edge, Boolean> edgeElimainateMap = new Hashtable<>();
         Hashtable<Edge, Integer> sMap = new Hashtable<>();
-        for (Edge e : newEdgeSet) {
+        for (Edge e : edgeSet) {
             edgeVisitedMap.put(e, false);
             edgeElimainateMap.put(e, false);
             sMap.put(e, 0);
@@ -592,11 +586,10 @@ public class SupTruss {
         LinkedList<Edge> promoteEdgeSet = new LinkedList<>();
 
         for (Edge e0 : tds) {
-
-            int t_e0 = trussMap.get(e0);
+            int t_e0 = trussMap.get(e0); //need delete edges trussMap,
             Integer v1_e0 = e0.getV1();
             Integer v2_e0 = e0.getV2();
-            LinkedList<Integer> set0Common = GraphHandler.getCommonNeighbors(oldAdjMap, e0);
+            LinkedList<Integer> set0Common = GraphHandler.getCommonNeighbors(adjMap, e0);
 
             for (int w : set0Common) {
                 Edge e1 = new Edge(w, v1_e0);
@@ -622,12 +615,12 @@ public class SupTruss {
             while (!stack.empty()) {
                 Edge e_stack = stack.pop();
                 if (sMap.get(e_stack) < t_root - 2) { //cannot support
-                    eliminate(newAdjMap, trussMap, sMap, edgeElimainateMap, t_root, e_stack);
+                    eliminate(adjMap, trussMap, sMap, edgeElimainateMap, t_root, e_stack);
 
                     Integer a = e_stack.getV1();
                     Integer b = e_stack.getV2();
-                    LinkedList<Integer> setA = newAdjMap.get(a);
-                    LinkedList<Integer> setB = newAdjMap.get(b);
+                    LinkedList<Integer> setA = adjMap.get(a);
+                    LinkedList<Integer> setB = adjMap.get(b);
                     LinkedList<Integer> setC = (LinkedList<Integer>) setA.clone();
                     setC.retainAll(setB);
 
@@ -665,8 +658,8 @@ public class SupTruss {
         }
 
 //        Hashtable<Edge, Integer> newTrussMap = (Hashtable<Edge, Integer>) trussMap.clone();
-        for (Edge e : newEdgeSet) {
-            if (edgeVisitedMap.get(e) && !edgeElimainateMap.get(e)) {
+        for (Edge e : edgeSet) {
+            if (edgeVisitedMap.get(e) && edgeElimainateMap.get(e)) {
                 int t = trussMap.get(e);
                 trussMap.put(e, t - 1);
             }
@@ -675,57 +668,14 @@ public class SupTruss {
         for (Edge e : tds) {
             trussMap.remove(e);
         }
+
         long endTime = System.currentTimeMillis();
-        Result result = new Result(trussMap, endTime - startTime, "SupTrussInsertEdge");
+        Result result = new Result(trussMap, endTime - startTime, "SupDeleteEdge");
         result.setGraph(newGraph);
 
-        LOGGER.info("Truss decomposition is computed");
+        LOGGER.info("End SupTruss deletion tds, size:" + tds.size());
         return result;
     }
-
-    /**
-     * get a tds from a set of addEdges, addEdges are not in adjMap
-     *
-     * @param adjMap
-     * @param addEdges
-     * @return
-     */
-    private static LinkedList<Edge> getInsertionTDS(Hashtable<Integer, LinkedList<Integer>> adjMap, LinkedList<Edge> addEdges) {
-        LinkedList<Edge> tds = new LinkedList<>();
-
-        //the first edge of addEdges must be one of tds
-        Edge firstEdge = addEdges.poll();
-        tds.add(firstEdge);
-        Hashtable<Integer, LinkedList<Integer>> tempAdjMap = GraphHandler.deepCloneAdjMap(adjMap);
-        tempAdjMap = GraphHandler.insertEdgeToAdjMap(tempAdjMap, firstEdge);
-
-        if (addEdges.isEmpty()) {
-            return tds;
-        }
-        for (Edge e_new : addEdges) {
-            tempAdjMap = GraphHandler.insertEdgeToAdjMap(tempAdjMap, e_new); //important!!! need to insert the edge first
-            LinkedList<Edge> e_new_triangleEdgeSet = GraphHandler.getTriangleEdges(tempAdjMap, e_new); //new edges
-
-            boolean tdsFlag = true;
-            for (int i = 0; i < tds.size(); i++) {
-                Edge e_tds = tds.get(i);
-                LinkedList<Edge> e_tds_triangleEdgeSet = GraphHandler.getTriangleEdges(tempAdjMap, e_tds);
-                if (GraphHandler.haveCommonElement(e_new_triangleEdgeSet, e_tds_triangleEdgeSet)) {
-                    tempAdjMap = GraphHandler.removeEdgeFromAdjMap(tempAdjMap, e_new); //remove the not satsify edge
-                    tdsFlag = false;
-                    break;
-                }
-            }
-            if (tdsFlag) {
-                tds.add(e_new);
-            }
-
-        }
-        addEdges.removeAll(tds);
-        return tds;
-    }
-
-
 
     /***
      *  eliminate

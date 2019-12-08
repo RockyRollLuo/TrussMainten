@@ -24,7 +24,7 @@ public class ThreadEdgeInsert implements Runnable {
 
     @Override
     public void run() {
-        LOGGER.info("Start run thread ParaEdgeInsertion e0:" + e0.toString());
+        LOGGER.info("Start run thread ThreadEdgeInsert e0:" + e0.toString());
         Hashtable<Integer, LinkedList<Integer>> adjMap = graph.getAdjMap();
         LinkedList<Edge> edgeSet = graph.getEdgeSet();
         Integer v1_e0 = e0.getV1();
@@ -78,7 +78,8 @@ public class ThreadEdgeInsert implements Runnable {
 
         //3.compute local sSupMap
         Hashtable<Edge, Integer> sSupMap = new Hashtable<>();
-        for (Edge e : edgeSet) {
+        for (int i = 0; i < edgeSet.size(); i++) {
+            Edge e = edgeSet.get(i);
             Integer v1_e = e.getV1();
             Integer v2_e = e.getV2();
             LinkedList<Integer> set1_e = adjMap.get(v1_e);
@@ -211,8 +212,7 @@ public class ThreadEdgeInsert implements Runnable {
             }
         }
 
-
-        LOGGER.info("End run thread ParaEdgeInsertion e0:" + e0.toString());
+        LOGGER.info("End run thread ThreadEdgeInsert e0:" + e0.toString());
     }
 
     /***

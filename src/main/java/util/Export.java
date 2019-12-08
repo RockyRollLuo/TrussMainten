@@ -18,7 +18,7 @@ public class Export {
      * @param result
      * @throws IOException
      */
-    public static void writeFile(Result result) throws IOException {
+    public static void writeFile(Result result, int print) throws IOException {
         long takenTime = result.getTakenTime();
         Hashtable<Object, Integer> output = (Hashtable<Object, Integer>) result.getOutput();
         String algorithmName = result.getAlgorithmName();
@@ -45,13 +45,14 @@ public class Export {
         bw.write("#threadNums:" + threadNums); //only useful for Parallel way
         bw.newLine();
 
-        for (Object key : output.keySet()) {
-            bw.write(key.toString() + "\t" + output.get(key));
-            bw.newLine();
+        if (print>0) {
+            for (Object key : output.keySet()) {
+                bw.write(key.toString() + "\t" + output.get(key));
+                bw.newLine();
+            }
         }
         bw.close();
 
         LOGGER.info("Result was exported.: " + fileName);
-
     }
 }

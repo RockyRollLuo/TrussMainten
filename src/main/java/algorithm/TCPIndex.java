@@ -109,22 +109,18 @@ public class TCPIndex {
         LinkedList<Edge> addEdges = (LinkedList<Edge>) dynamicEdges.clone();
 
         long startTime = System.currentTimeMillis();
-        Hashtable<Integer, LinkedList<Integer>> adjMap = graph.getAdjMap();
-        LinkedList<Edge> edgeSet = graph.getEdgeSet();
-        Result tempResult = null;
-
+        Result tempResult;
         while (!addEdges.isEmpty()) {
             Edge e0 = addEdges.poll();
             tempResult = edgeInsertionRun(graph, trussMap, e0);
+
             //update graph
-            adjMap = GraphHandler.insertEdgeToAdjMap(adjMap, e0);
-            edgeSet.add(e0);
-            graph = new Graph(adjMap, edgeSet);
+            graph = tempResult.getGraph();
             trussMap = (Hashtable<Edge, Integer>) tempResult.getOutput();
         }
 
         LOGGER.info("End TCPTruss insert dynamicEdges, size=" + addEdges.size());
-        return new Result(tempResult.getOutput(), System.currentTimeMillis() - startTime, "TCPInsertEdges");
+        return new Result(trussMap, System.currentTimeMillis() - startTime, "TCPInsertEdges");
     }
 
     /**
@@ -134,20 +130,24 @@ public class TCPIndex {
      * @return trussness of edges
      */
     public static Result edgeInsertionRun(Graph graph, Hashtable<Edge, Integer> trussMap, Edge e0) {
+        LOGGER.info("Start run TCPInsertion e0:" + e0.toString());
 
         long startTime = System.currentTimeMillis();
 
-        Hashtable<Integer, LinkedList<Integer>> oldAdjMap = graph.getAdjMap();
-        LinkedList<Edge> oldEdgeSet = graph.getEdgeSet();
+        Hashtable<Integer, LinkedList<Integer>> adjMap = graph.getAdjMap();
+        LinkedList<Edge> edgeSet = graph.getEdgeSet();
 
-        LinkedList<Edge> newEdgeSet = ((LinkedList<Edge>) oldEdgeSet.clone());
-        newEdgeSet.add(e0);
-        Hashtable<Integer, LinkedList<Integer>> newAdjMap = GraphHandler.deepCloneAdjMap(oldAdjMap);
-        newAdjMap = GraphHandler.insertEdgeToAdjMap(newAdjMap, e0);
-        Graph newGraph = new Graph(newAdjMap, newEdgeSet);
+        //update graph
+        int v1 = e0.getV1();
+        int v2 = e0.getV2();
+        LinkedList<Integer> set1 = adjMap.get(v1);
+        LinkedList<Integer> set2 = adjMap.get(v2);
+        edgeSet.add(e0);
+        set1.add(v2);
+        set2.add(v1);
 
-        int k1 = computeTrussnessLowerBound(newGraph, trussMap, e0);
-        int k2 = computeTrussnessUpperBound(newGraph, trussMap, e0);
+        int k1 = computeTrussnessLowerBound(graph, trussMap, e0);
+        int k2 = computeTrussnessUpperBound(graph, trussMap, e0);
         trussMap.put(e0, k1);
         int k_max = k2 - 1;
 
@@ -155,14 +155,14 @@ public class TCPIndex {
 
         Integer u = e0.getV1();
         Integer v = e0.getV2();
-        LinkedList<Integer> set0Common = GraphHandler.getCommonNeighbors(newAdjMap, e0);
+        LinkedList<Integer> set0Common = GraphHandler.getCommonNeighbors(adjMap, e0);
         for (int w : set0Common) {
             Edge e_wu = new Edge(u, w);
             Edge e_wv = new Edge(v, w);
             int t_wu = trussMap.get(e_wu);
             int t_wv = trussMap.get(e_wv);
             int t_min = Math.min(t_wu, t_wv);
-            LinkedList<Edge> Lk = LkMap.get(t_min)==null?new LinkedList<Edge>():LkMap.get(t_min);
+            LinkedList<Edge> Lk = LkMap.get(t_min) == null ? new LinkedList<Edge>() : LkMap.get(t_min);
             if (t_min <= k_max) {
                 if (t_wu == t_min) {
                     Lk.add(e_wu);
@@ -184,7 +184,7 @@ public class TCPIndex {
                 s.put(e_xy, 0);
                 Integer x = e_xy.getV1();
                 Integer y = e_xy.getV2();
-                LinkedList<Integer> setZ = GraphHandler.getCommonNeighbors(newAdjMap, e_xy);
+                LinkedList<Integer> setZ = GraphHandler.getCommonNeighbors(adjMap, e_xy);
                 for (Integer z : setZ) {
                     Edge e_zx = new Edge(z, x);
                     Edge e_zy = new Edge(z, y);
@@ -203,7 +203,7 @@ public class TCPIndex {
                     Lk.remove(e_xy);
                     Integer x = e_xy.getV1();
                     Integer y = e_xy.getV2();
-                    LinkedList<Integer> setZ = GraphHandler.getCommonNeighbors(newAdjMap, e_xy);
+                    LinkedList<Integer> setZ = GraphHandler.getCommonNeighbors(adjMap, e_xy);
                     for (Integer z : setZ) {
                         Edge e_zx = new Edge(z, x);
                         Edge e_zy = new Edge(z, y);
@@ -232,7 +232,9 @@ public class TCPIndex {
         }
 
         long endTime = System.currentTimeMillis();
-        return new Result(trussMap, endTime - startTime, "TCPIndex");
+        Result result = new Result(trussMap, endTime - startTime, "TCPIndex");
+        result.setGraph(graph);
+        return result;
     }
 
 
@@ -255,10 +257,9 @@ public class TCPIndex {
         while (!addEdges.isEmpty()) {
             Edge e0 = addEdges.poll();
             tempResult = edgeDeletionRun(graph, trussMap, e0);
+
             //update graph
-            adjMap = GraphHandler.removeEdgeFromAdjMap(adjMap, e0);
-            edgeSet.add(e0);
-            graph = new Graph(adjMap, edgeSet);
+            graph = tempResult.getGraph();
             trussMap = (Hashtable<Edge, Integer>) tempResult.getOutput();
         }
         LOGGER.info("End TCPTruss insert dynamicEdges, size=" + addEdges.size());
@@ -367,6 +368,8 @@ public class TCPIndex {
         }
 
         long endTime = System.currentTimeMillis();
-        return new Result(trussMap, endTime - startTime, "TCPIndex");
+        Result result = new Result(trussMap, endTime - startTime, "TCPIndex");
+        result.setGraph(graph);
+        return result;
     }
 }

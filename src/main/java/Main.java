@@ -12,6 +12,8 @@ import java.util.LinkedList;
 
 public class Main {
     private static Logger LOGGER = Logger.getLogger(Main.class);
+    @Option(abbr = 'p', usage = "Print trussMap")
+    public static int print = 1;
 
     @Option(abbr = 's', usage = "Separate delimiter,0:tab,1:space,2:comma")
     public static String delim = "\t";
@@ -19,7 +21,7 @@ public class Main {
     @Option(abbr = 'd', usage = "dynamic type, 0:static TrussDecomp, 1:MultiEdgesInsertion, 2:MultiEdgesDeletion")
     public static int dynamicType = 0;
 
-    @Option(abbr = 'a', usage = "algorithm type, 0:TCPInde, 1:SupTruss, 2:ParaTruss")
+    @Option(abbr = 'a', usage = "algorithm type, 0:TCPIndex, 1:SupTruss, 2:ParaTruss")
     public static int algorithmType = 0;
 
     @Option(abbr = 'o', usage = "orders of magnitude,number=2^o,o=0,1,2,3,4,5,6")
@@ -35,7 +37,7 @@ public class Main {
         args = SetOpt.setOpt(main, args);
 
         LOGGER.info("Basic information:");
-        System.err.println("Dynamic edges:" + (int) Math.pow(2, order));
+        System.err.println("Dynamic edges:" + (int) Math.pow(10, order));
         System.err.println("Dynamic type:" + dynamicType);
         System.err.println("Algorithm type:" + algorithmType);
         System.err.println("Thread number:" + threadNum);
@@ -76,70 +78,71 @@ public class Main {
         switch (dynamicType) {
             case 0:
                 LOGGER.info("==dynamicType 0: truss decomposition========");
-                Export.writeFile(result_full);
+                Export.writeFile(result_full, print);
                 break;
             case 1:
                 /**
                  * MultiEdgesInsertion
                  */
                 LOGGER.info("==dynamicType 1: MultiEdgesInsertion========");
-                Export.writeFile(result_rest);
-                Export.writeFile(result_full);
+                Export.writeFile(result_rest, print);
+                Export.writeFile(result_full, print);
 
                 switch (algorithmType) {
                     case 0:
                         result1 = TCPIndex.edgesInsertion(restGraph, dynamicEdges, trussMap_rest);
                         result1.setDatasetName(datasetName);
                         result1.setOrder(order);
-                        Export.writeFile(result1);
+                        Export.writeFile(result1, print);
                         break;
                     case 1:
                         result2 = SupTruss.edgesInsertion(restGraph, dynamicEdges, trussMap_rest);
                         result2.setDatasetName(datasetName);
                         result2.setOrder(order);
-                        Export.writeFile(result2);
+                        Export.writeFile(result2, print);
                         break;
                     case 2:
                         result3 = Parallel.edgesInsertion(restGraph, dynamicEdges, trussMap_rest, threadNum);
                         result3.setDatasetName(datasetName);
                         result3.setOrder(order);
                         result3.setThreadNums(threadNum);
-                        Export.writeFile(result3);
+                        Export.writeFile(result3, print);
                         break;
                 }
-
-
-
-
-
-
                 break;
             case 2:
                 /**
                  * MultiEdgesInsertion
                  */
                 LOGGER.info("==dynamicType 2: MultiEdgesDeletion========");
-                Export.writeFile(result_rest);
+                Export.writeFile(result_rest, print);
+                Export.writeFile(result_full, print);
 
-                result1 = TCPIndex.edgesDeletion(fullGraph, dynamicEdges, trussMap_full);
-                result1.setDatasetName(datasetName);
-                result1.setOrder(order);
-                Export.writeFile(result1);
+                switch (algorithmType) {
+                    case 0:
+                        result1 = TCPIndex.edgesDeletion(fullGraph, dynamicEdges, trussMap_full);
+                        result1.setDatasetName(datasetName);
+                        result1.setOrder(order);
+                        Export.writeFile(result1, print);
+                        break;
 
-                result2 = SupTruss.edgesDeletion(fullGraph, dynamicEdges, trussMap_full);
-                result2.setDatasetName(datasetName);
-                result2.setOrder(order);
-                Export.writeFile(result2);
+                    case 1:
+                        result2 = SupTruss.edgesDeletion(fullGraph, dynamicEdges, trussMap_full);
+                        result2.setDatasetName(datasetName);
+                        result2.setOrder(order);
+                        Export.writeFile(result2, print);
+                        break;
 
-                result3 = Parallel.edgesDeletion(fullGraph, dynamicEdges, trussMap_full, threadNum);
-                result3.setDatasetName(datasetName);
-                result3.setOrder(order);
-                result3.setThreadNums(threadNum);
-                Export.writeFile(result3);
-
+                    case 2:
+                        result3 = Parallel.edgesDeletion(fullGraph, dynamicEdges, trussMap_full, threadNum);
+                        result3.setDatasetName(datasetName);
+                        result3.setOrder(order);
+                        result3.setThreadNums(threadNum);
+                        Export.writeFile(result3, print);
+                        break;
+                }
                 break;
             default:
-
                 break;
         }
     }

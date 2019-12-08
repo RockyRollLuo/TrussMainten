@@ -276,8 +276,12 @@ public class GraphHandler {
             for (int w : setCommon) {
                 Edge e1 = new Edge(v1, w);
                 Edge e2 = new Edge(v2, w);
-                if (trussMap.get(e) <= Math.min(trussMap.get(e1), trussMap.get(e2)))
+                int t_e1 = trussMap.get(e1) == null ? 0 : trussMap.get(e1);
+                int t_e2 = trussMap.get(e2) == null ? 0 : trussMap.get(e2);
+
+                if (trussMap.get(e) <= Math.min(t_e1, t_e2)) {
                     ss++;
+                }
             }
             sSupMap.put(e, ss);
         }
@@ -376,24 +380,21 @@ public class GraphHandler {
     public static LinkedList<Edge> getDeletionTDS(Graph graph, LinkedList<Edge> removeEdges) {
         LinkedList<Edge> tds = new LinkedList<>();
 
-        Hashtable<Integer, LinkedList<Integer>> adjMap = graph.getAdjMap();
-        LinkedList<Edge> edgeSet = graph.getEdgeSet();
+        Hashtable<Integer, LinkedList<Integer>> tempAdjMap = GraphHandler.deepCloneAdjMap(graph.getAdjMap());
 
         Edge firstEdge = removeEdges.poll();
         tds.add(firstEdge);
-        adjMap = GraphHandler.removeEdgeFromAdjMap(adjMap, firstEdge);
 
         for (Edge e_new : removeEdges) {
-            LinkedList<Edge> e_new_triangleEdgeSet = getTriangleEdges(adjMap, e_new);
+            LinkedList<Edge> e_new_triangleEdgeSet = getTriangleEdges(tempAdjMap, e_new);
 
             boolean tdsFlag = true;
             for (int i = 0; i < tds.size(); i++) {
                 Edge e_tds = tds.get(i);
 
-                LinkedList<Edge> e_tds_triangleEdgeSet = getTriangleEdges(adjMap, e_tds);
+                LinkedList<Edge> e_tds_triangleEdgeSet = getTriangleEdges(tempAdjMap, e_tds);
 
                 if (haveCommonElement(e_new_triangleEdgeSet, e_tds_triangleEdgeSet)) {
-                    tds.offer(e_new);
                     tdsFlag = false;
                     break;
                 }
@@ -401,8 +402,7 @@ public class GraphHandler {
             if(tdsFlag) tds.add(e_new);
         }
 
-        edgeSet.retainAll(tds);
-        adjMap = GraphHandler.removeEdgesFromAdjMap(adjMap, tds);
+        tempAdjMap = GraphHandler.removeEdgesFromAdjMap(tempAdjMap, tds);
         removeEdges.removeAll(tds);
         return tds;
     }
