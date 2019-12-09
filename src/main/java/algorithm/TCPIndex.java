@@ -1,5 +1,6 @@
 package algorithm;
 
+import org.apache.commons.logging.impl.LogKitLogger;
 import org.apache.log4j.Logger;
 import util.Edge;
 import util.Graph;
@@ -193,34 +194,47 @@ public class TCPIndex {
                     if (t_zx < k || t_zy < k) continue;
                     int s_xy = s.get(e_xy);
                     s.put(e_xy, s_xy + 1);
-                    if (t_zx == k && !Lk.contains(e_zx)) Q.push(e_zx);
-                    if (t_zy == k && !Lk.contains(e_zy)) Q.push(e_zy);
+                    if (t_zx == k && !Lk.contains(e_zx)) {
+                        Lk.add(e_zx);
+                        Q.push(e_zx);
+                    }
+                    if (t_zy == k && !Lk.contains(e_zy)) {
+                        Lk.add(e_zy);
+                        Q.push(e_zy);
+                    }
                 }
             }
 
+            LinkedList<Edge> delQueue = new LinkedList<>();
             for (Edge e_xy : Lk) {
                 if (s.get(e_xy) < k - 2) {
-                    Lk.remove(e_xy);
-                    Integer x = e_xy.getV1();
-                    Integer y = e_xy.getV2();
-                    LinkedList<Integer> setZ = GraphHandler.getCommonNeighbors(adjMap, e_xy);
-                    for (Integer z : setZ) {
-                        Edge e_zx = new Edge(z, x);
-                        Edge e_zy = new Edge(z, y);
-                        int t_zx = trussMap.get(e_zx);
-                        int t_zy = trussMap.get(e_zy);
+                    delQueue.offer(e_xy);
+                }
+            }
+            while (!delQueue.isEmpty()) {
+                Edge e_xy = delQueue.poll();
+                Lk.remove(e_xy);
+                Integer x = e_xy.getV1();
+                Integer y = e_xy.getV2();
+                LinkedList<Integer> setZ = GraphHandler.getCommonNeighbors(adjMap, e_xy);
+                for (Integer z : setZ) {
+                    Edge e_zx = new Edge(z, x);
+                    Edge e_zy = new Edge(z, y);
+                    int t_zx = trussMap.get(e_zx);
+                    int t_zy = trussMap.get(e_zy);
 
-                        if (t_zx < k || t_zy < k) continue;
-                        if (t_zx == k && !Lk.contains(e_zx)) continue;
-                        if (t_zy == k && !Lk.contains(e_zy)) continue;
-                        if (Lk.contains(e_zx)) {
-                            int s_zx = s.get(e_zx);
-                            s.put(e_zx, s_zx - 1);
-                        }
-                        if (Lk.contains(e_zy)) {
-                            int s_zy = s.get(e_zy);
-                            s.put(e_zy, s_zy - 1);
-                        }
+                    if (t_zx < k || t_zy < k) continue;
+                    if (t_zx == k && !Lk.contains(e_zx)) continue;
+                    if (t_zy == k && !Lk.contains(e_zy)) continue;
+                    if (Lk.contains(e_zx)) {
+                        int s_zx = s.get(e_zx) - 1;
+                        s.put(e_zx, s_zx);
+                        if (s_zx == k - 3) delQueue.offer(e_zx);
+                    }
+                    if (Lk.contains(e_zy)) {
+                        int s_zy = s.get(e_zy) - 1;
+                        s.put(e_zy, s_zy);
+                        if (s_zy == k - 3) delQueue.offer(e_zy);
                     }
                 }
             }
@@ -232,7 +246,7 @@ public class TCPIndex {
         }
 
         long endTime = System.currentTimeMillis();
-        Result result = new Result(trussMap, endTime - startTime, "TCPIndex");
+        Result result = new Result(trussMap, endTime - startTime, "TCPInsertEdge");
         result.setGraph(graph);
         return result;
     }
@@ -247,25 +261,21 @@ public class TCPIndex {
      */
     public static Result edgesDeletion(Graph graph, LinkedList<Edge> dynamicEdges, Hashtable<Edge, Integer> trussMap) {
         LOGGER.info("Start TCPTruss deletion dynamicEdges, size=" + dynamicEdges.size());
-        LinkedList<Edge> addEdges = (LinkedList<Edge>) dynamicEdges.clone();
+        LinkedList<Edge> removeEdge = (LinkedList<Edge>) dynamicEdges.clone();
 
         long startTime = System.currentTimeMillis();
-        Hashtable<Integer, LinkedList<Integer>> adjMap = graph.getAdjMap();
-        LinkedList<Edge> edgeSet = graph.getEdgeSet();
         Result tempResult;
-
-        while (!addEdges.isEmpty()) {
-            Edge e0 = addEdges.poll();
+        while (!removeEdge.isEmpty()) {
+            Edge e0 = removeEdge.poll();
             tempResult = edgeDeletionRun(graph, trussMap, e0);
 
             //update graph
             graph = tempResult.getGraph();
             trussMap = (Hashtable<Edge, Integer>) tempResult.getOutput();
         }
-        LOGGER.info("End TCPTruss insert dynamicEdges, size=" + addEdges.size());
+        LOGGER.info("End TCPTruss insert dynamicEdges, size=" + removeEdge.size());
         return new Result(trussMap, System.currentTimeMillis() - startTime, "TCPDeleteEdges");
     }
-
 
     /**
      * one edge deletion
@@ -275,100 +285,115 @@ public class TCPIndex {
      * @return
      */
     public static Result edgeDeletionRun(Graph graph, Hashtable<Edge, Integer> trussMap, Edge e0) {
+        LOGGER.info("Start TCP edge deletion, e:" + e0.toString());
+
         long startTime = System.currentTimeMillis();
 
-        Hashtable<Integer, LinkedList<Integer>> oldAdjMap = graph.getAdjMap();
-        LinkedList<Edge> oldEdgeSet = graph.getEdgeSet();
+        Hashtable<Integer, LinkedList<Integer>> adjMap = graph.getAdjMap();
+        LinkedList<Edge> edgeSet = graph.getEdgeSet();
 
-        LinkedList<Edge> newEdgeSet = ((LinkedList<Edge>) oldEdgeSet.clone());
-        newEdgeSet.add(e0);
-        Hashtable<Integer, LinkedList<Integer>> newAdjMap = GraphHandler.deepCloneAdjMap(oldAdjMap);
-        newAdjMap = GraphHandler.insertEdgeToAdjMap(newAdjMap, e0);
-        Graph newGraph = new Graph(newAdjMap, newEdgeSet);
+        //update graph
+        edgeSet.remove(e0);
+        adjMap = GraphHandler.removeEdgeFromAdjMap(adjMap, e0);
 
-        int k1 = computeTrussnessLowerBound(newGraph, trussMap, e0);
-        int k2 = computeTrussnessUpperBound(newGraph, trussMap, e0);
-        trussMap.put(e0, k1);
-        int k_max = k2 - 1;
+        int k_root = trussMap.get(e0);
+        if (k_root > 2) {
+            Hashtable<Integer, LinkedList<Edge>> LkMap = new Hashtable<>();
 
-        Hashtable<Integer, LinkedList<Edge>> LkMap = new Hashtable<>();
+            Integer u = e0.getV1();
+            Integer v = e0.getV2();
+            LinkedList<Integer> set0Common = GraphHandler.getCommonNeighbors(adjMap, e0);
 
-        Integer u = e0.getV1();
-        Integer v = e0.getV2();
-        LinkedList<Integer> set0Common = GraphHandler.getCommonNeighbors(newAdjMap, e0);
-        for (int w : set0Common) {
-            Edge e_wu = new Edge(u, w);
-            Edge e_wv = new Edge(v, w);
-            int t_wu = trussMap.get(e_wu);
-            int t_wv = trussMap.get(e_wv);
-            int t_min = Math.min(t_wu, t_wv);
-            LinkedList<Edge> Lk = LkMap.get(t_min);
-            if (t_min <= k_max) {
-                if (t_wu == t_min) Lk.add(e_wu);
-                if (t_wv == t_min) Lk.add(e_wv);
-            }
-        }
-
-        Hashtable<Edge, Integer> s = new Hashtable<>();
-        for (int k = k_max; k > 1; k--) {
-            LinkedList<Edge> Lk = LkMap.get(k);
-            if (Lk == null) continue;
-            Stack<Edge> Q = new Stack<>();
-            Q.addAll(Lk);
-            while (!Q.isEmpty()) {
-                Edge e_xy = Q.pop();
-                s.put(e_xy, 0);
-                Integer x = e_xy.getV1();
-                Integer y = e_xy.getV2();
-                LinkedList<Integer> setZ = GraphHandler.getCommonNeighbors(newAdjMap, e_xy);
-                for (Integer z : setZ) {
-                    Edge e_zx = new Edge(z, x);
-                    Edge e_zy = new Edge(z, y);
-                    int t_zx = trussMap.get(e_zx);
-                    int t_zy = trussMap.get(e_zy);
-                    if (t_zx < k || t_zy < k) continue;
-                    int s_xy = s.get(e_xy);
-                    s.put(e_xy, s_xy + 1);
-                    if (t_zx == k && !Lk.contains(e_zx)) Q.push(e_zx);
-                    if (t_zy == k && !Lk.contains(e_zy)) Q.push(e_zy);
+            //initialize Lk
+            for (int w : set0Common) {
+                Edge e_wu = new Edge(u, w);
+                Edge e_wv = new Edge(v, w);
+                int t_wu = trussMap.get(e_wu);
+                int t_wv = trussMap.get(e_wv);
+                int t_min = Math.min(t_wu, t_wv);
+                LinkedList<Edge> Lk = LkMap.get(t_min) == null ? new LinkedList<Edge>() : LkMap.get(t_min);
+                if (t_min <= k_root) {
+                    if (t_wu == t_min) Lk.add(e_wu);
+                    if (t_wv == t_min) Lk.add(e_wv);
                 }
+                LkMap.put(t_min, Lk);
             }
 
-            for (Edge e_xy : Lk) {
-                if (s.get(e_xy) < k - 2) {
-                    Lk.remove(e_xy);
+            for (int k = k_root; k > 1; k--) {
+                LinkedList<Edge> Lk = LkMap.get(k);
+                if (Lk == null) continue;
+                Stack<Edge> Q = new Stack<>();
+                Q.addAll(Lk);
+                Hashtable<Edge, Integer> s = new Hashtable<>();
+                //traversal
+                while (!Q.isEmpty()) {
+                    Edge e_xy = Q.pop();
+                    s.put(e_xy, 0);
                     Integer x = e_xy.getV1();
                     Integer y = e_xy.getV2();
-                    LinkedList<Integer> setZ = GraphHandler.getCommonNeighbors(newAdjMap, e_xy);
+                    LinkedList<Integer> setZ = GraphHandler.getCommonNeighbors(adjMap, e_xy);
                     for (Integer z : setZ) {
                         Edge e_zx = new Edge(z, x);
                         Edge e_zy = new Edge(z, y);
                         int t_zx = trussMap.get(e_zx);
                         int t_zy = trussMap.get(e_zy);
-
                         if (t_zx < k || t_zy < k) continue;
-                        if (t_zx == k && !Lk.contains(e_zx)) continue;
-                        if (t_zy == k && !Lk.contains(e_zy)) continue;
-                        if (Lk.contains(e_zx)) {
-                            int s_zx = s.get(e_zx);
-                            s.put(e_zx, s_zx - 1);
+                        int s_xy = s.get(e_xy);
+                        s.put(e_xy, s_xy + 1);
+                        if (t_zx == k && !Lk.contains(e_zx)) {
+                            Lk.add(e_zx);
+                            Q.push(e_zx);
                         }
-                        if (Lk.contains(e_zy)) {
-                            int s_zy = s.get(e_zy);
-                            s.put(e_zy, s_zy - 1);
+                        if (t_zy == k && !Lk.contains(e_zy)) {
+                            Lk.add(e_zy);
+                            Q.push(e_zy);
+                        }
+
+                    }
+                }
+
+                LinkedList<Edge> queue = new LinkedList<>(Lk);
+                while (!queue.isEmpty()) {
+                    Edge e_xy = queue.poll();
+
+                    if (s.get(e_xy) < k - 2) {
+                        //update truss
+                        int t_xy = trussMap.get(e_xy);
+                        trussMap.put(e_xy, t_xy - 1);
+
+                        Lk.remove(e_xy);
+                        Integer x = e_xy.getV1();
+                        Integer y = e_xy.getV2();
+                        LinkedList<Integer> setZ = GraphHandler.getCommonNeighbors(adjMap, e_xy);
+                        for (Integer z : setZ) {
+                            Edge e_zx = new Edge(z, x);
+                            Edge e_zy = new Edge(z, y);
+                            int t_zx = trussMap.get(e_zx);
+                            int t_zy = trussMap.get(e_zy);
+
+                            if (t_zx < k || t_zy < k) continue;
+                            if (t_zx == k && !Lk.contains(e_zx)) continue;
+                            if (t_zy == k && !Lk.contains(e_zy)) continue;
+                            if (Lk.contains(e_zx)) {
+                                int s_zx = s.get(e_zx) - 1;
+                                s.put(e_zx, s_zx);
+                                if (s_zx == k - 1) queue.offer(e_zx); //just reduce 1
+                            }
+                            if (Lk.contains(e_zy)) {
+                                int s_zy = s.get(e_zy) - 1;
+                                s.put(e_zy, s_zy);
+                                if (s_zy == k - 1) queue.offer(e_zy);
+                            }
                         }
                     }
                 }
-            }
 
-            for (Edge e_xy : Lk) {
-                int t_xy = trussMap.get(e_xy);
-                trussMap.put(e_xy, t_xy + 1);
             }
         }
+        trussMap.remove(e0);
 
         long endTime = System.currentTimeMillis();
-        Result result = new Result(trussMap, endTime - startTime, "TCPIndex");
+        Result result = new Result(trussMap, endTime - startTime, "TCPDeleteEdge");
         result.setGraph(graph);
         return result;
     }

@@ -77,7 +77,7 @@ public class Main {
          */
         switch (dynamicType) {
             case 0:
-                LOGGER.info("==dynamicType 0: truss decomposition========");
+                LOGGER.info("==dynamicType 0: Static Truss Decomposition========");
                 Export.writeFile(result_full, print);
                 break;
             case 1:
@@ -112,7 +112,7 @@ public class Main {
                 break;
             case 2:
                 /**
-                 * MultiEdgesInsertion
+                 * MultiEdgesDeletion
                  */
                 LOGGER.info("==dynamicType 2: MultiEdgesDeletion========");
                 Export.writeFile(result_rest, print);

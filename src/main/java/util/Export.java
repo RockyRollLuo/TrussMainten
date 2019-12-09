@@ -15,6 +15,7 @@ public class Export {
 
     /**
      * write the result to a file
+     *
      * @param result
      * @throws IOException
      */
@@ -27,25 +28,25 @@ public class Export {
         int order = result.getOrder();
         int threadNums = result.getThreadNums();
 
-        String fileName="outputs\\"+algorithmName+"_"+datasetName+"_D"+order+"_T"+threadNums;
+        String fileName = "outputs\\" + algorithmName + "_" + datasetName + "_D" + order + "_T" + threadNums;
 
         LOGGER.info("Exporting graph... ");
 
 
         BufferedWriter bw = new BufferedWriter(new FileWriter(fileName));
-        bw.write("#takenTime:"+takenTime+"ms");
+        bw.write("#takenTime:" + takenTime + "ms");
         bw.newLine();
 
-        bw.write("#times:"+times);
+        bw.write("#times:" + times);
         bw.newLine();
 
-        bw.write("#dynamic edges:" + (int)Math.pow(10,order));
+        bw.write("#dynamic edges:" + (int) Math.pow(10, order));
         bw.newLine();
 
         bw.write("#threadNums:" + threadNums); //only useful for Parallel way
         bw.newLine();
 
-        if (print>0) {
+        if (print > 0) {
             for (Object key : output.keySet()) {
                 bw.write(key.toString() + "\t" + output.get(key));
                 bw.newLine();
