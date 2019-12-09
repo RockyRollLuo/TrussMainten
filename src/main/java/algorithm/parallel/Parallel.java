@@ -16,14 +16,16 @@ public class Parallel {
     /**
      * insert a set of edges, tds parallel
      *
-     * @param graph
+     * @param graph_rest
      * @param dynamicEdges
      * @param threadNum
      * @return
      */
-    public static Result edgesInsertion(Graph graph, LinkedList<Edge> dynamicEdges, Hashtable<Edge, Integer> trussMap, int threadNum) {
+    public static Result edgesInsertion(Graph graph_rest, LinkedList<Edge> dynamicEdges, Hashtable<Edge, Integer> trussMap_rest, int threadNum) {
         LOGGER.info("Start Parallel insert dynamicEdges, size=" + dynamicEdges.size());
         LinkedList<Edge> addEdges = (LinkedList<Edge>) dynamicEdges.clone();
+        Hashtable<Edge, Integer> trussMap = (Hashtable<Edge, Integer>) trussMap_rest.clone();
+        Graph graph = graph_rest.clone();
 
         long totalTime = 0;
         Result tempResult;
@@ -95,15 +97,16 @@ public class Parallel {
     /**
      * delete a set of edges, tds parallel
      *
-     * @param graph
+     * @param graph_full
      * @param dynamicEdges
      * @param threadNum
      * @return
      */
-    public static Result edgesDeletion(Graph graph, LinkedList<Edge> dynamicEdges, Hashtable<Edge, Integer> trussMap, int threadNum) {
-        LOGGER.info("Start Parallel delete dynamicEdges, size=" + dynamicEdges.size());
-
+    public static Result edgesDeletion(Graph graph_full, LinkedList<Edge> dynamicEdges, Hashtable<Edge, Integer> trussMap_full, int threadNum) {
+        LOGGER.info("Start Parallel delete dynamicEdges, size=" + dynamicEdges.size() + " threadNum:" + threadNum);
         LinkedList<Edge> addEdges = (LinkedList<Edge>) dynamicEdges.clone();
+        Hashtable<Edge, Integer> trussMap = (Hashtable<Edge, Integer>) trussMap_full.clone();
+        Graph graph = graph_full.clone();
 
         long totalTime = 0;
         Result tempResult;

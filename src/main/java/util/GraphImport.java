@@ -24,12 +24,18 @@ public class GraphImport {
      * @throws IOException
      */
     public static Graph load(String datasetName, String delim) throws IOException {
-        String path = "datasets\\" + datasetName;
+        //Operate System
+        String pathSeparator = "\\";
+        String os = System.getProperty("os.name");
+        if (!os.toLowerCase().startsWith("win")) {
+            pathSeparator = "/";
+        }
+
+        String path = "datasets" + pathSeparator + datasetName;
 
         LOGGER.info("Start loading graph: " + path);
 
         final Hashtable<Integer, LinkedList<Integer>> adjMap = new Hashtable<>();
-//        final HashSet<Edge> tempEdgeSet = new HashSet<>();
         final LinkedList<Edge> edgeSet = new LinkedList<>();
 
         final BufferedReader br = new BufferedReader(new FileReader(path));
@@ -38,8 +44,6 @@ public class GraphImport {
             if (line == null) {
                 break;
             } else if (line.startsWith("#") || line.startsWith("%") || line.startsWith("//")) { //comment
-//                LOGGER.info("The following line was ignored during loading a graph:");
-//                System.err.println(line);
                 continue;
             } else {
                 String[] tokens = line.split(delim);

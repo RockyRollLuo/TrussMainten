@@ -101,13 +101,15 @@ public class TCPIndex {
     /**
      * a list of edges insertion
      *
-     * @param graph
+     * @param graph_rest
      * @param dynamicEdges
      * @return
      */
-    public static Result edgesInsertion(Graph graph, LinkedList<Edge> dynamicEdges, Hashtable<Edge, Integer> trussMap) {
+    public static Result edgesInsertion(Graph graph_rest, LinkedList<Edge> dynamicEdges, Hashtable<Edge, Integer> trussMap_rest) {
         LOGGER.info("Start TCPTruss insert dynamicEdges, size=" + dynamicEdges.size());
         LinkedList<Edge> addEdges = (LinkedList<Edge>) dynamicEdges.clone();
+        Hashtable<Edge, Integer> trussMap = (Hashtable<Edge, Integer>) trussMap_rest.clone();
+        Graph graph = graph_rest.clone();
 
         long startTime = System.currentTimeMillis();
         Result tempResult;
@@ -255,13 +257,15 @@ public class TCPIndex {
     /**
      * a list of edges deletion
      *
-     * @param graph
+     * @param graph_full
      * @param dynamicEdges
      * @return
      */
-    public static Result edgesDeletion(Graph graph, LinkedList<Edge> dynamicEdges, Hashtable<Edge, Integer> trussMap) {
+    public static Result edgesDeletion(Graph graph_full, LinkedList<Edge> dynamicEdges, Hashtable<Edge, Integer> trussMap_full) {
         LOGGER.info("Start TCPTruss deletion dynamicEdges, size=" + dynamicEdges.size());
         LinkedList<Edge> removeEdge = (LinkedList<Edge>) dynamicEdges.clone();
+        Hashtable<Edge, Integer> trussMap = (Hashtable<Edge, Integer>) trussMap_full.clone();
+        Graph graph = graph_full.clone();
 
         long startTime = System.currentTimeMillis();
         Result tempResult;

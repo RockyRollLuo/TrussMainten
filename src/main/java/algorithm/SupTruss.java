@@ -174,13 +174,15 @@ public class SupTruss {
     /**
      * insert a random set of edges to graph
      *
-     * @param graph
+     * @param graph_rest
      * @param dynamicEdges
      * @return
      */
-    public static Result edgesInsertion(Graph graph, LinkedList<Edge> dynamicEdges, Hashtable<Edge, Integer> trussMap) {
+    public static Result edgesInsertion(Graph graph_rest, LinkedList<Edge> dynamicEdges, Hashtable<Edge, Integer> trussMap_rest) {
         LOGGER.info("Start SupTruss insert dynamicEdges, size=" + dynamicEdges.size());
         LinkedList<Edge> addEdges = (LinkedList<Edge>) dynamicEdges.clone();
+        Hashtable<Edge, Integer> trussMap = (Hashtable<Edge, Integer>) trussMap_rest.clone();
+        Graph graph = graph_rest.clone();
 
         long totalTime = 0;
         int edgeNum = addEdges.size();
@@ -188,7 +190,7 @@ public class SupTruss {
         int times = 0;
 
         while (!addEdges.isEmpty()) {
-            LOGGER.info("SupTruss insert edges progress: " + (edgeNum - addEdges.size()) + "/" + edgeNum + "...");
+            LOGGER.info("SupTruss insert edges progress: " + (edgeNum - addEdges.size()) + "/" + edgeNum);
 
             LinkedList<Edge> tds = GraphHandler.getInsertionTDS(graph, addEdges);
 
@@ -348,7 +350,7 @@ public class SupTruss {
         Result result = new Result(trussMap, endTime - startTime, "SupTrussInsertEdge");
         result.setGraph(newGraph);
 
-        LOGGER.info("End SupTruss insert tds is computed");
+        LOGGER.info("End SupTruss insert tds, size:"+tds.size());
         return result;
     }
 
@@ -508,13 +510,15 @@ public class SupTruss {
     /**
      * delete a random set of edge from graph
      *
-     * @param graph
+     * @param graph_full
      * @param dynamicEdges
      * @return
      */
-    public static Result edgesDeletion(Graph graph, LinkedList<Edge> dynamicEdges, Hashtable<Edge, Integer> trussMap) {
+    public static Result edgesDeletion(Graph graph_full, LinkedList<Edge> dynamicEdges, Hashtable<Edge, Integer> trussMap_full) {
         LOGGER.info("Start SupTruss delete dynamicEdges, size=" + dynamicEdges.size());
         LinkedList<Edge> removeEdges = (LinkedList<Edge>) dynamicEdges.clone();
+        Hashtable<Edge, Integer> trussMap = (Hashtable<Edge, Integer>) trussMap_full.clone();
+        Graph graph = graph_full.clone();
 
         int edgeNum = dynamicEdges.size();
         long totalTime = 0;

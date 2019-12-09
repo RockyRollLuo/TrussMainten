@@ -28,7 +28,13 @@ public class Export {
         int order = result.getOrder();
         int threadNums = result.getThreadNums();
 
-        String fileName = "outputs\\" + algorithmName + "_" + datasetName + "_D" + order + "_T" + threadNums;
+        //Operate System
+        String pathSeparator = "\\";
+        String os = System.getProperty("os.name");
+        if (!os.toLowerCase().startsWith("win")) {
+            pathSeparator = "/";
+        }
+        String fileName = "outputs" + pathSeparator + algorithmName + "_" + datasetName + "_D" + order + "_T" + threadNums;
 
         LOGGER.info("Exporting graph... ");
 
