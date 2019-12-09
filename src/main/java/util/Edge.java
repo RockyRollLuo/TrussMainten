@@ -1,12 +1,9 @@
 package util;
 
 import java.io.Serializable;
-import java.util.LinkedList;
 
 
 public class Edge implements Comparable<Edge>, Cloneable, Serializable {
-
-
     private int v1;
     private int v2;
 
@@ -31,27 +28,21 @@ public class Edge implements Comparable<Edge>, Cloneable, Serializable {
         this.v2 = v2;
     }
 
-    //TODO：manybe wrong
     @Override
     public int hashCode() {
-        int hash=0;
-        hash=v1*31+v2;
-        return hash;
+        return (v1 * 31) + v2;
     }
 
     @Override
     public boolean equals(Object obj) {
         Edge e2 = (Edge) obj;
-        if ((this.v1== e2.getV1() && this.v2 == e2.getV2()) || (this.v1 == e2.getV2() && this.v2 == e2.getV1())) {
-            return true;
-        }
-        return false;
+        return (this.v1 == e2.getV1() && this.v2 == e2.getV2()) || (this.v1 == e2.getV2() && this.v2 == e2.getV1());
     }
 
     @Override
     protected Object clone() throws CloneNotSupportedException {
-        int v3 = new Integer(this.v1);
-        int v4 = new Integer(this.v2);
+        int v3 = this.v1;
+        int v4 = this.v2;
         return new Edge(v3, v4);
     }
 
@@ -68,44 +59,5 @@ public class Edge implements Comparable<Edge>, Cloneable, Serializable {
     @Override
     public String toString() {
         return "(" + v1 + "," + v2 + ")";
-    }
-
-    public static void main(String[] args) {
-        Edge e1 = new Edge(1, 5);
-        Edge e2 = new Edge(0, 2);
-        Edge e3 = new Edge(0, 1);
-        Edge e4 = new Edge(1, 4);
-        Edge e5 = new Edge(3, 7);
-
-//        TreeSet<Edge> set = new TreeSet<>();
-        LinkedList<Edge> set = new LinkedList<>();
-        set.add(e1);
-        set.add(e2);
-        set.add(e3);
-        set.add(e4);
-
-        System.out.println(set);
-        set.remove(e1);
-        set.add(e5);
-        System.out.println(set);
-        set.remove(e2);
-        System.out.println(set);
-        set.remove(e3);
-        System.out.println(set);
-        set.remove(e4);
-        System.out.println(set);
-
-        set.remove(e1);
-        System.out.println(set);
-
-        if (e1.equals(e2)) {
-            System.out.println("true");
-        } else {
-            System.out.println("false");
-        }
-
-        System.out.printf("e1.hashcode:%s:%n",e1.hashCode());
-        System.out.printf("e2.hashcode:%s:%n",e2.hashCode());
-        System.out.printf("e3.hashcode:%s:%n",e3.hashCode());
     }
 }
