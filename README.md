@@ -47,7 +47,7 @@ java -jar -Xms20g -Xmx20g TrussMainten.jar [datasetName] -d [dynamicType] -a [al
 
 MainBatch Running Demo
 ========================
-java -jar -Xms20g -Xmx20g TrussMainten.jar [datasetName] -d [dynamicType] -a [algorithmType] -o [order] -t [threadNum] -p [printResult]
+java -jar -Xms20g -Xmx20g TrussMainten.jar [datasetName] -o [order] -p [printResult]
 
 ## datasetName:
 + CA-AstroPh.txt

@@ -1,5 +1,6 @@
 package util;
 
+import java.util.LinkedList;
 
 public class Result {
     private Graph graph;
@@ -10,7 +11,12 @@ public class Result {
     private String datasetName;
     private int order;
     private int threadNums;
+    private LinkedList<Integer> tdsSizeList;
 
+
+    /**
+     * constructor
+     */
 
     public Result(Object output, long takenTime) {
         this.output = output;
@@ -41,7 +47,6 @@ public class Result {
         this.datasetName = datasetName;
         this.times = 1;
     }
-
 
 
     /**
@@ -111,5 +116,13 @@ public class Result {
 
     public void setThreadNums(int threadNums) {
         this.threadNums = threadNums;
+    }
+
+    public LinkedList<Integer> getTdsSizeList() {
+        return tdsSizeList;
+    }
+
+    public void setTdsSizeList(LinkedList<Integer> tdsSizeList) {
+        this.tdsSizeList = tdsSizeList;
     }
 }

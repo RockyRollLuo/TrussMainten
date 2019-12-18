@@ -6,7 +6,6 @@ import util.Graph;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Stack;
-import java.util.concurrent.CountDownLatch;
 
 public class ThreadEdgeDelete implements Runnable {
 
@@ -14,13 +13,16 @@ public class ThreadEdgeDelete implements Runnable {
     private Edge e0;
     private Hashtable<Edge, Integer> trussMap; //include edges in graph and e0
 
+    private Hashtable<Edge, Boolean> changeMap;//record an edge change
+
     /**
      * constructor
      */
-    public ThreadEdgeDelete(Graph graph, Edge e0, Hashtable<Edge, Integer> trussMap) {
+    public ThreadEdgeDelete(Graph graph, Edge e0, Hashtable<Edge, Integer> trussMap, Hashtable<Edge, Boolean> changeMap) {
         this.graph = graph;
         this.e0 = e0;
         this.trussMap = trussMap;
+        this.changeMap = changeMap;
     }
 
     @Override
@@ -114,11 +116,13 @@ public class ThreadEdgeDelete implements Runnable {
                         Edge bc = new Edge(b, c);
 
                         if (trussMap.get(ac) == t_root && trussMap.get(bc) > t_root && !edgeVisitedMap.get(ac)) {
+                            if (changeMap.get(ac) == null ? false : changeMap.get(ac)) continue;
                             stack.push(ac);
                             edgeVisitedMap.put(ac, true);
                             int s_ac = sMap.get(ac);
                             sMap.put(ac, s_ac + sSupMap.get(ac));
                         } else if (trussMap.get(bc) == t_root && trussMap.get(ac) > t_root && !edgeVisitedMap.get(bc)) {
+                            if (changeMap.get(ac) == null ? false : changeMap.get(ac)) continue;
                             stack.push(bc);
                             edgeVisitedMap.put(bc, true);
                             int s_bc = sMap.get(bc);
@@ -148,6 +152,7 @@ public class ThreadEdgeDelete implements Runnable {
                 if (edgeVisitedMap.get(e) && edgeElimainateMap.get(e)) {
                     int t = trussMap.get(e);
                     trussMap.put(e, t - 1);
+                    changeMap.put(e, true);
                 }
             }
 
@@ -179,15 +184,14 @@ public class ThreadEdgeDelete implements Runnable {
                 if (trussMap.get(ac) == t_root) {
                     int s_ac = sMap.get(ac) - 1;
                     sMap.put(ac, s_ac);
-                    if (s_ac == t_root - 2 && !edgeElimanateMap.get(ac)) {
+                    if (s_ac == t_root - 3 && !edgeElimanateMap.get(ac)) {
                         eliminate(adjMap, trussMap, sMap, edgeElimanateMap, t_root, ac);
                     }
                 }
                 if (trussMap.get(bc) == t_root) {
                     int s_bc = sMap.get(bc) - 1;
                     sMap.put(ac, s_bc);
-
-                    if (s_bc == t_root - 2 && !edgeElimanateMap.get(bc)) {
+                    if (s_bc == t_root - 3 && !edgeElimanateMap.get(bc)) {
                         eliminate(adjMap, trussMap, sMap, edgeElimanateMap, t_root, bc);
                     }
                 }

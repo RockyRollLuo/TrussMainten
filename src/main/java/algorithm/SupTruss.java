@@ -10,7 +10,6 @@ public class SupTruss {
 
     /**
      * one random edge insertion
-     *
      * @param graph the object of Graph
      * @return
      */
@@ -30,7 +29,6 @@ public class SupTruss {
 
     /**
      * one edge insertion
-     *
      * @param graph
      * @param e0
      * @return
@@ -55,17 +53,14 @@ public class SupTruss {
 
         //compute trussMap from old graph
         Hashtable<Edge, Integer> trussMap = GraphHandler.computeTrussMap(graph);
-
-        //compute truss of e0
+        //compute truss of e0 LB
         int t_e0_LB = GraphHandler.computeTrussnessLowerBound(newAdjMap, trussMap, e0);
         trussMap.put(e0, t_e0_LB);
-
         //compute SustainSupportMap
         Hashtable<Edge, Integer> sSupMap = GraphHandler.computeSustainSupportMap(newGraph, trussMap);
-
         //compute PivotalSupportMap
         Hashtable<Edge, Integer> pSupMap = GraphHandler.computePivotalSupportMap(newGraph, trussMap, sSupMap);
-
+        //compute truss of e0 UB
         int t_e0_UB = GraphHandler.computeTrussnessUpperBound(pSupMap, e0, t_e0_LB);
 
         /**
@@ -173,7 +168,6 @@ public class SupTruss {
 
     /**
      * insert a random set of edges to graph
-     *
      * @param graph_rest
      * @param dynamicEdges
      * @return
@@ -188,12 +182,13 @@ public class SupTruss {
         int edgeNum = addEdges.size();
         Result tempResult;
         int times = 0;
+        LinkedList<Integer> tdsSizeList = new LinkedList<>();
 
         while (!addEdges.isEmpty()) {
             LOGGER.info("SupTruss insert edges progress: " + (edgeNum - addEdges.size()) + "/" + edgeNum);
 
             LinkedList<Edge> tds = GraphHandler.getInsertionTDS(graph, addEdges);
-
+            tdsSizeList.add(tds.size());
             //compute tds
             tempResult = edgeTDSInsertion(graph, tds, trussMap);
 
@@ -209,6 +204,7 @@ public class SupTruss {
 
         Result result = new Result(trussMap, totalTime, "SupInsertEdges");
         result.setTimes(times);
+        result.setTdsSizeList(tdsSizeList);
 
         LOGGER.info("End SupTruss insert dynamicEdges, size=" + addEdges.size());
         return result;
@@ -240,17 +236,15 @@ public class SupTruss {
             int t_e0_LB = GraphHandler.computeTrussnessLowerBound(newAdjMap, trussMap, e0);
             trussMap.put(e0, t_e0_LB);
         }
+        //compute SustainSupportMap
+        Hashtable<Edge, Integer> sSupMap = GraphHandler.computeSustainSupportMap(newGraph, trussMap);
+        //compute PivotalSupportMap
+        Hashtable<Edge, Integer> pSupMap = GraphHandler.computePivotalSupportMap(newGraph, trussMap, sSupMap);
 
         /**
          * start main processing
          */
         long startTime = System.currentTimeMillis();
-
-        //compute SustainSupportMap
-        Hashtable<Edge, Integer> sSupMap = GraphHandler.computeSustainSupportMap(newGraph, trussMap);
-
-        //compute PivotalSupportMap
-        Hashtable<Edge, Integer> pSupMap = GraphHandler.computePivotalSupportMap(newGraph, trussMap, sSupMap);
 
         //lazy initial
         Hashtable<Edge, Boolean> edgeVisitedMap = new Hashtable<>();
@@ -262,24 +256,16 @@ public class SupTruss {
             sMap.put(e, 0);
         }
         LinkedList<Edge> promoteEdgeSet = new LinkedList<>();
-
         for (Edge e0 : tds) {
             int t_e0_UB = GraphHandler.computeTrussnessUpperBound(pSupMap, e0, trussMap.get(e0));
-
             Integer v1_e0 = e0.getV1();
             Integer v2_e0 = e0.getV2();
             LinkedList<Integer> set0Common = GraphHandler.getCommonNeighbors(newAdjMap, e0);
-
             for (int w : set0Common) {
                 Edge e1 = new Edge(w, v1_e0);
                 Edge e2 = new Edge(w, v2_e0);
-
-                if (trussMap.get(e1) < t_e0_UB) {
-                    promoteEdgeSet.add(e1);
-                }
-                if (trussMap.get(e2) < t_e0_UB) {
-                    promoteEdgeSet.add(e2);
-                }
+                if (trussMap.get(e1) < t_e0_UB) promoteEdgeSet.add(e1);
+                if (trussMap.get(e2) < t_e0_UB) promoteEdgeSet.add(e2);
             }
         }
 
@@ -356,7 +342,6 @@ public class SupTruss {
 
     /**
      * one random edge deletion
-     *
      * @param graph the object of Graph
      * @return
      */
@@ -370,7 +355,6 @@ public class SupTruss {
 
     /**
      * one edge deletion
-     *
      * @param graph
      * @param e0
      * @return
@@ -395,10 +379,8 @@ public class SupTruss {
 
         //compute old graph trussMap
         Hashtable<Edge, Integer> trussMap = GraphHandler.computeTrussMap(graph);
-
         //compute sustainSupportMap
         Hashtable<Edge, Integer> sSupMap = GraphHandler.computeSustainSupportMap(newGraph, trussMap);
-
         //compute pivotalSupportMap
         Hashtable<Edge, Integer> pSupMap = GraphHandler.computePivotalSupportMap(newGraph, trussMap, sSupMap);
 
@@ -509,7 +491,6 @@ public class SupTruss {
 
     /**
      * delete a random set of edge from graph
-     *
      * @param graph_full
      * @param dynamicEdges
      * @return
@@ -524,12 +505,14 @@ public class SupTruss {
         long totalTime = 0;
         Result tempResult;
         int times = 0;
+        LinkedList<Integer> tdsSizeList = new LinkedList<>();
 
         while (!removeEdges.isEmpty()) {
             LOGGER.info("SupTruss insert edges progress: " + (edgeNum - removeEdges.size()) + "/" + edgeNum + "...");
-            LinkedList<Edge> tds = GraphHandler.getDeletionTDS(graph, removeEdges);
 
             //compute tds
+            LinkedList<Edge> tds = GraphHandler.getDeletionTDS(graph, removeEdges);
+            tdsSizeList.add(tds.size());
             tempResult = edgeTDSDeletion(graph, tds, trussMap);
 
             //cumulative time
@@ -545,6 +528,7 @@ public class SupTruss {
 
         Result result = new Result(trussMap, totalTime, "SupDeleteEdges");
         result.setTimes(times);
+        result.setTdsSizeList(tdsSizeList);
 
         LOGGER.info("End SupTruss delete dynamicEdges, size=" + removeEdges.size());
         return result;
@@ -553,7 +537,6 @@ public class SupTruss {
 
     /**
      * delete a tds from a graph
-     *
      * @param graph
      * @param tds
      * @return
@@ -569,14 +552,13 @@ public class SupTruss {
         adjMap = GraphHandler.removeEdgesFromAdjMap(adjMap, tds);
         Graph newGraph = new Graph(adjMap, edgeSet);
 
-        /**
+        //compute SustainSupportMap
+        Hashtable<Edge, Integer> sSupMap = GraphHandler.computeSustainSupportMap(newGraph, trussMap);
+
          /**
          * start main processing
          */
         long startTime = System.currentTimeMillis();
-
-        //compute SustainSupportMap
-        Hashtable<Edge, Integer> sSupMap = GraphHandler.computeSustainSupportMap(newGraph, trussMap);
 
         //lazy initial
         Hashtable<Edge, Boolean> edgeVisitedMap = new Hashtable<>();
@@ -588,23 +570,16 @@ public class SupTruss {
             sMap.put(e, 0);
         }
         LinkedList<Edge> promoteEdgeSet = new LinkedList<>();
-
         for (Edge e0 : tds) {
             int t_e0 = trussMap.get(e0); //need delete edges trussMap,
             Integer v1_e0 = e0.getV1();
             Integer v2_e0 = e0.getV2();
             LinkedList<Integer> set0Common = GraphHandler.getCommonNeighbors(adjMap, e0);
-
             for (int w : set0Common) {
                 Edge e1 = new Edge(w, v1_e0);
                 Edge e2 = new Edge(w, v2_e0);
-
-                if (trussMap.get(e1) <= t_e0) {
-                    promoteEdgeSet.add(e1);
-                }
-                if (trussMap.get(e2) <= t_e0) {
-                    promoteEdgeSet.add(e2);
-                }
+                if (trussMap.get(e1) <= t_e0) promoteEdgeSet.add(e1);
+                if (trussMap.get(e2) <= t_e0) promoteEdgeSet.add(e2);
             }
         }
 

@@ -13,13 +13,16 @@ public class ThreadEdgeInsert implements Runnable {
     private Edge e0;
     private Hashtable<Edge, Integer> trussMap; //include edges in graph and e0
 
+    private Hashtable<Edge, Boolean> changeMap;//record an edge change
+
     /**
      * constructor
      */
-    public ThreadEdgeInsert(Graph graph, Edge e0, Hashtable<Edge, Integer> trussMap) {
+    public ThreadEdgeInsert(Graph graph, Edge e0, Hashtable<Edge, Integer> trussMap, Hashtable<Edge, Boolean> changeMap) {
         this.graph = graph;
         this.e0 = e0;
         this.trussMap = trussMap;
+        this.changeMap = changeMap;
     }
 
     @Override
@@ -173,11 +176,13 @@ public class ThreadEdgeInsert implements Runnable {
                         Edge bc = new Edge(b, c);
 
                         if (trussMap.get(ac) == t_root && trussMap.get(bc) > t_root && sSupMap.get(ac) > t_root - 2 && !edgeVisitedMap.get(ac)) {
+                            if(changeMap.get(ac)==null?false:changeMap.get(ac)) continue;
                             stack.push(ac);
                             edgeVisitedMap.put(ac, true);
                             int s_ac = sMap.get(ac);
                             sMap.put(ac, s_ac + pSupMap.get(ac));
                         } else if (trussMap.get(bc) == t_root && trussMap.get(ac) > t_root && sSupMap.get(bc) > t_root - 2 && !edgeVisitedMap.get(bc)) {
+                            if(changeMap.get(bc)==null?false:changeMap.get(bc)) continue;
                             stack.push(bc);
                             edgeVisitedMap.put(bc, true);
                             int s_bc = sMap.get(bc);
@@ -209,6 +214,7 @@ public class ThreadEdgeInsert implements Runnable {
             if (edgeVisitedMap.get(e) && !edgeElimainateMap.get(e)) {
                 int t = trussMap.get(e);
                 trussMap.put(e, t + 1);
+                changeMap.put(e, true);
             }
         }
 

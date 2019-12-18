@@ -47,7 +47,7 @@ public class MainBatch {
         Hashtable<Edge, Integer> trussMap_full = (Hashtable<Edge, Integer>) result_full.getOutput();
         Export.writeFile(result_full, 1);
 
-        for (int order = 0; order <= maxOrder; order++) {
+        for (int order = 1; order <= maxOrder; order++) {
             LOGGER.error(" ======Stage Begin, order" + order);
 
             //dynamic edges 10^d
@@ -68,7 +68,6 @@ public class MainBatch {
             Hashtable<Edge, Integer> trussMap_rest = (Hashtable<Edge, Integer>) result_rest.getOutput();
             Export.writeFile(result_rest, print);
 
-
             /**
              * ONE Multi Edges Insertion
              */
@@ -86,7 +85,7 @@ public class MainBatch {
 
             //ONE-three algorithm3:ParaTrussInsertion
             if (threadRange > 0) {
-                for (int threadNum = 1; threadNum <= maxThreadNum+4; threadNum = threadNum+2) {
+                for (int threadNum = 2; threadNum <= maxThreadNum*2; threadNum = threadNum*2) {
                     Result result13 = Parallel.edgesInsertion(restGraph, dynamicEdges, trussMap_rest, threadNum);
                     result13.setDatasetName(datasetName);
                     result13.setOrder(order);

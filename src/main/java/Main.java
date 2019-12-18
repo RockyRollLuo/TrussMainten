@@ -65,6 +65,7 @@ public class Main {
         //result_rest
         Result result_rest = new TrussDecomp(restGraph).run();
         result_rest.setDatasetName(datasetName + "_rest");
+        result_rest.setOrder(order);
         Hashtable<Edge, Integer> trussMap_rest = (Hashtable<Edge, Integer>) result_rest.getOutput();
 
         //result for below

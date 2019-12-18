@@ -337,17 +337,12 @@ public class GraphHandler {
         LinkedList<Edge> tds = new LinkedList<>();
 
         Hashtable<Integer, LinkedList<Integer>> tempAdjMap = GraphHandler.deepCloneAdjMap(graph.getAdjMap());
+        tempAdjMap = GraphHandler.insertEdgesToAdjMap(tempAdjMap, addEdges);
 
-        //the first edge of addEdges must be one of tds
-        Edge firstEdge = addEdges.poll();
-        tds.add(firstEdge);
-        tempAdjMap = GraphHandler.insertEdgeToAdjMap(tempAdjMap, firstEdge);
+        tds.add(addEdges.poll());
+        if(addEdges.isEmpty()) return tds;
 
-        if (addEdges.isEmpty()) {
-            return tds;
-        }
         for (Edge e_new : addEdges) {
-            tempAdjMap = GraphHandler.insertEdgeToAdjMap(tempAdjMap, e_new);
             LinkedList<Edge> e_new_triangleEdgeSet = getTriangleEdges(tempAdjMap, e_new); //new edges
 
             boolean tdsFlag = true;
@@ -355,18 +350,46 @@ public class GraphHandler {
                 Edge e_tds = tds.get(i);
                 LinkedList<Edge> e_tds_triangleEdgeSet = getTriangleEdges(tempAdjMap, e_tds);
                 if (haveCommonElement(e_new_triangleEdgeSet, e_tds_triangleEdgeSet)) {
-                    tempAdjMap = GraphHandler.removeEdgeFromAdjMap(tempAdjMap, e_new);
-                    tdsFlag = false;
+                    tdsFlag=false;
                     break;
                 }
             }
             if (tdsFlag) {
                 tds.add(e_new);
             }
-
         }
         addEdges.removeAll(tds);
         return tds;
+
+//        //the first edge of addEdges must be one of tds
+//        Edge firstEdge = addEdges.poll();
+//        tds.add(firstEdge);
+//        tempAdjMap = GraphHandler.insertEdgeToAdjMap(tempAdjMap, firstEdge);
+//
+//        if (addEdges.isEmpty()) {
+//            return tds;
+//        }
+//        for (Edge e_new : addEdges) {
+//            tempAdjMap = GraphHandler.insertEdgeToAdjMap(tempAdjMap, e_new);
+//            LinkedList<Edge> e_new_triangleEdgeSet = getTriangleEdges(tempAdjMap, e_new); //new edges
+//
+//            boolean tdsFlag = true;
+//            for (int i = 0; i < tds.size(); i++) {
+//                Edge e_tds = tds.get(i);
+//                LinkedList<Edge> e_tds_triangleEdgeSet = getTriangleEdges(tempAdjMap, e_tds);
+//                if (haveCommonElement(e_new_triangleEdgeSet, e_tds_triangleEdgeSet)) {
+//                    tempAdjMap = GraphHandler.removeEdgeFromAdjMap(tempAdjMap, e_new);
+//                    tdsFlag = false;
+//                    break;
+//                }
+//            }
+//            if (tdsFlag) {
+//                tds.add(e_new);
+//            }
+//
+//        }
+//        addEdges.removeAll(tds);
+//        return tds;
     }
 
 

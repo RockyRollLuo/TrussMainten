@@ -6,6 +6,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Hashtable;
+import java.util.LinkedList;
 
 /**
  * Export the result to a file
@@ -27,6 +28,7 @@ public class Export {
         int times = result.getTimes();
         int order = result.getOrder();
         int threadNums = result.getThreadNums();
+        LinkedList<Integer> tdsSizeList = result.getTdsSizeList();
 
         //Operate System
         String pathSeparator = "\\";
@@ -43,7 +45,7 @@ public class Export {
         bw.write("#takenTime:" + takenTime + "ms");
         bw.newLine();
 
-        bw.write("#times:" + times);
+        bw.write("#iterTimes:" + times+"-"+tdsSizeList);
         bw.newLine();
 
         bw.write("#dynamic edges:" + (int) Math.pow(10, order));
