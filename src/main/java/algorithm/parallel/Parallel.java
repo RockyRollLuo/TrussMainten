@@ -55,7 +55,6 @@ public class Parallel {
         return result;
     }
 
-
     /**
      * insert a tds to a graph
      *
@@ -79,7 +78,7 @@ public class Parallel {
         ExecutorService executorService = new ThreadPoolExecutor(threadNum, threadNum, 0, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>(), new ThreadPoolExecutor.CallerRunsPolicy());
 //        ExecutorService executorService = Executors.newFixedThreadPool(threadNum);
         for (Edge e : tds) {
-            executorService.submit(new ThreadEdgeInsert(graph, e, trussMap,changeMap));
+            executorService.submit(new ThreadEdgeInsert(graph, e, trussMap, changeMap));
         }
         executorService.shutdown();
 

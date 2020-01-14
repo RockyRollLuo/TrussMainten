@@ -2,6 +2,7 @@ import algorithm.SupTruss;
 import algorithm.TCPIndex;
 import algorithm.TrussDecomp;
 import algorithm.parallel.Parallel;
+import algorithm.parallel.SupTrussParallel;
 import org.apache.log4j.Logger;
 import util.*;
 import util.SetOpt.Option;
@@ -18,14 +19,14 @@ public class Main {
     @Option(abbr = 's', usage = "Separate delimiter,0:tab,1:space,2:comma")
     public static String delim = "\t";
 
-    @Option(abbr = 'd', usage = "dynamic type, 0:static TrussDecomp, 1:MultiEdgesInsertion, 2:MultiEdgesDeletion")
+    @Option(abbr = 'd', usage = "dynamic type, 0:static TrussDecomp, 1:MultiEdgesInsertion, 2:MultiEdgesDeletion, 3:SupTrussnessParallel")
     public static int dynamicType = 0;
 
     @Option(abbr = 'a', usage = "algorithm type, 0:TCPIndex, 1:SupTruss, 2:ParaTruss")
     public static int algorithmType = 0;
 
     @Option(abbr = 'o', usage = "orders of magnitude,number=2^o,o=0,1,2,3,4,5,6")
-    public static int order = 1;
+    public static int order = 6;
 
     @Option(abbr = 't', usage = "max thread number")
     public static int threadNum = 1;
@@ -42,12 +43,18 @@ public class Main {
         System.err.println("Algorithm type:" + algorithmType);
         System.err.println("Thread number:" + threadNum);
 
-        //read graph
+        //full graph
         String datasetName = args[0];
         Graph fullGraph = GraphImport.load(datasetName, delim);
 
+        //result_full
+        Result result_full = new TrussDecomp(fullGraph).run();
+        result_full.setDatasetName(datasetName + "_full");
+        Hashtable<Edge, Integer> trussMap_full = (Hashtable<Edge, Integer>) result_full.getOutput();
+
         //dynamic edges 2^d
-        int dynamicEdgesSize = (int) Math.pow(10, order);
+//        int dynamicEdgesSize = (int) Math.pow(10, order);
+        int dynamicEdgesSize = 1500000;
         LinkedList<Edge> dynamicEdges = RandomUtils.getRandomSetFromSet(fullGraph.getEdgeSet(), dynamicEdgesSize);
 
         //Graph
@@ -57,21 +64,20 @@ public class Main {
         adjMap = GraphHandler.removeEdgesFromAdjMap(adjMap, dynamicEdges);
         Graph restGraph = new Graph(adjMap, edgeSet);
 
-        //result_full
-        Result result_full = new TrussDecomp(fullGraph).run();
-        result_full.setDatasetName(datasetName + "_full");
-        Hashtable<Edge, Integer> trussMap_full = (Hashtable<Edge, Integer>) result_full.getOutput();
-
         //result_rest
         Result result_rest = new TrussDecomp(restGraph).run();
         result_rest.setDatasetName(datasetName + "_rest");
         result_rest.setOrder(order);
         Hashtable<Edge, Integer> trussMap_rest = (Hashtable<Edge, Integer>) result_rest.getOutput();
+//        //todo:test
+//        Result result_rest = null;
+//        Hashtable<Edge, Integer> trussMap_rest = null;
 
         //result for below
         Result result1;
         Result result2;
         Result result3;
+        Result result4;
 
         /**
          * Dynamic type
@@ -109,6 +115,15 @@ public class Main {
                         result3.setThreadNums(threadNum);
                         Export.writeFile(result3, print);
                         break;
+                    case 3:
+                        result4 = SupTrussParallel.edgesInsertion(restGraph, dynamicEdges, trussMap_rest, threadNum);
+                        result4.setDatasetName(datasetName);
+                        result4.setOrder(order);
+                        result4.setThreadNums(threadNum);
+                        Export.writeFile(result4, print);
+                        break;
+                    default:
+                        break;
                 }
                 break;
             case 2:
@@ -116,7 +131,7 @@ public class Main {
                  * MultiEdgesDeletion
                  */
                 LOGGER.info("==dynamicType 2: MultiEdgesDeletion========");
-                Export.writeFile(result_rest, print);
+//                Export.writeFile(result_rest, print); //todo
                 Export.writeFile(result_full, print);
 
                 switch (algorithmType) {
@@ -140,6 +155,17 @@ public class Main {
                         result3.setOrder(order);
                         result3.setThreadNums(threadNum);
                         Export.writeFile(result3, print);
+                        break;
+
+                    case 3:
+                        result4 = SupTrussParallel.edgesDeletion(fullGraph, dynamicEdges, trussMap_full, threadNum);
+                        result4.setDatasetName(datasetName);
+                        result4.setOrder(order);
+                        result4.setThreadNums(threadNum);
+                        Export.writeFile(result4, print);
+                        break;
+
+                    default:
                         break;
                 }
                 break;

@@ -52,7 +52,7 @@ public class GraphHandler {
      * get edge(u,v) the common neighbors of u and v
      *
      * @param adjMap
-     * @param edge the edge do not need to be an edge of adjmap
+     * @param edge   the edge do not need to be an edge of adjmap
      * @return
      */
     public static LinkedList<Integer> getCommonNeighbors(Hashtable<Integer, LinkedList<Integer>> adjMap, Edge edge) {
@@ -196,7 +196,7 @@ public class GraphHandler {
      * @param e        new inserted edge
      * @return the trussness of e
      */
-    public static int computeTrussnessLowerBound( Hashtable<Integer, LinkedList<Integer>> adjMap, Hashtable<Edge, Integer> trussMap, Edge e) {
+    public static int computeTrussnessLowerBound(Hashtable<Integer, LinkedList<Integer>> adjMap, Hashtable<Edge, Integer> trussMap, Edge e) {
 
         Integer v1_e = e.getV1();
         Integer v2_e = e.getV2();
@@ -206,7 +206,9 @@ public class GraphHandler {
         for (int w : set0Common) {
             Edge e1 = new Edge(v1_e, w);
             Edge e2 = new Edge(v2_e, w);
-            commonTrussList.add(Math.min(trussMap.get(e1), trussMap.get(e2)));
+            int t1 = trussMap.get(e1) == null ? 0 : trussMap.get(e1);
+            int t2 = trussMap.get(e2) == null ? 0 : trussMap.get(e2);
+            commonTrussList.add(Math.min(t1, t2));
         }
 
         if (commonTrussList.size() == 0) {
@@ -214,7 +216,7 @@ public class GraphHandler {
         }
         int t_common_max = Collections.max(commonTrussList);
         HashMap<Integer, Integer> countMap = new HashMap<>();
-        for (int i = 2; i < t_common_max + 2; i++) {      //countMap.put(t_common_max + 1, 0), prevent null pointer
+        for (int i = 0; i < t_common_max + 2; i++) {      //countMap.put(t_common_max + 1, 0), prevent null pointer
             int count = 0;
             for (int j : commonTrussList) {
                 if (j >= i) count++;
@@ -288,6 +290,7 @@ public class GraphHandler {
         return sSupMap;
     }
 
+
     /**
      * compute pivotalSupportMap
      *
@@ -311,10 +314,10 @@ public class GraphHandler {
                 Edge e1 = new Edge(v1, w);
                 Edge e2 = new Edge(v2, w);
                 int t0 = trussMap.get(e);
-                int t1 = trussMap.get(e1);
-                int t2 = trussMap.get(e2);
-                int sSup1 = sSupMap.get(e1);
-                int sSup2 = sSupMap.get(e2);
+                int t1 = trussMap.get(e1) == null ? 0 : trussMap.get(e1);
+                int t2 = trussMap.get(e2) == null ? 0 : trussMap.get(e2);
+                int sSup1 = sSupMap.get(e1) == null ? 0 : sSupMap.get(e1);
+                int sSup2 = sSupMap.get(e2) == null ? 0 : sSupMap.get(e2);
 
                 if (t1 > t0 && t2 > t0) ps++;
                 else if (t1 == t0 && t2 > t0 && sSup1 > t0 - 2) ps++;
@@ -324,6 +327,116 @@ public class GraphHandler {
             pSupMap.put(e, ps);
         }
         return pSupMap;
+    }
+
+    /**
+     * update sSupMap after trussness changed
+     *
+     * @param graph
+     * @param trussMap
+     * @param sSupMap
+     * @return
+     */
+    public static void updateSustainSupportMap(Graph graph, Hashtable<Edge, Integer> trussMap, Hashtable<Edge, Integer> sSupMap, LinkedList<Edge> trussChangedEdges) {
+        Hashtable<Integer, LinkedList<Integer>> adjMap = graph.getAdjMap();
+
+        LinkedList<Edge> updateList = new LinkedList<>();
+        for (Edge e_orignal : trussChangedEdges) {
+            LinkedList<Edge> list = new LinkedList<>();
+            list.add(e_orignal);
+            Integer v1_e_org = e_orignal.getV1();
+            Integer v2_e_org = e_orignal.getV2();
+            LinkedList<Integer> v3Set_e_org = getCommonNeighbors(adjMap, e_orignal);
+            for (Integer v3_e_org : v3Set_e_org) {
+                list.add(new Edge(v1_e_org, v3_e_org));
+                list.add(new Edge(v2_e_org, v3_e_org));
+            }
+
+            for (Edge e : list) {
+                Integer v1_1hop = e_orignal.getV1();
+                Integer v2_1hop = e_orignal.getV2();
+                LinkedList<Integer> v3Set_1hop = getCommonNeighbors(adjMap, e);
+                for (Integer v3_1hop : v3Set_1hop) {
+                    list.add(new Edge(v1_1hop, v3_1hop));
+                    list.add(new Edge(v2_1hop, v3_1hop));
+                }
+            }
+
+            while (!list.isEmpty()) {
+                Edge e = list.poll();
+                if (updateList.contains(e)) continue;
+                Integer v1 = e.getV1();
+                Integer v2 = e.getV2();
+                LinkedList<Integer> setCommon = getCommonNeighbors(adjMap, e);
+
+                int ss = 0;
+                for (int w : setCommon) {
+                    Edge e1 = new Edge(v1, w);
+                    Edge e2 = new Edge(v2, w);
+                    int t_e1 = trussMap.get(e1) == null ? 0 : trussMap.get(e1);
+                    int t_e2 = trussMap.get(e2) == null ? 0 : trussMap.get(e2);
+
+                    if (trussMap.get(e) <= Math.min(t_e1, t_e2)) {
+                        ss++;
+                    }
+                }
+                sSupMap.put(e, ss);
+                updateList.add(e);
+            }
+        }
+    }
+
+    /**
+     * update sSupMap after trussness changed
+     *
+     * @param graph
+     * @param trussMap
+     * @param sSupMap
+     * @return
+     */
+    public static void updatePivotalSupportMap(Graph graph, Hashtable<Edge, Integer> trussMap, Hashtable<Edge, Integer> sSupMap, Hashtable<Edge, Integer> pSupMap, LinkedList<Edge> trussChangedEdges) {
+        Hashtable<Integer, LinkedList<Integer>> adjMap = graph.getAdjMap();
+
+        LinkedList<Edge> updateList = new LinkedList<>();
+        for (Edge e_orignal : trussChangedEdges) {
+            LinkedList<Edge> list = new LinkedList<>();
+            Integer v1_e_org = e_orignal.getV1();
+            Integer v2_e_org = e_orignal.getV2();
+            LinkedList<Integer> v3Set_e_org = getCommonNeighbors(adjMap, e_orignal);
+            for (Integer v3_e_org : v3Set_e_org) {
+                Edge v1v3 = new Edge(v1_e_org, v3_e_org);
+                list.add(v1v3);
+
+                Edge v2v3 = new Edge(v2_e_org, v3_e_org);
+                list.add(v2v3);
+            }
+
+            while (!list.isEmpty()) {
+                Edge e = list.poll();
+                if (updateList.contains(e)) continue;
+                Integer v1 = e.getV1();
+                Integer v2 = e.getV2();
+                LinkedList<Integer> setCommon = getCommonNeighbors(adjMap, e);
+
+                int ps = 0;
+                for (int w : setCommon) {
+                    Edge e1 = new Edge(v1, w);
+                    Edge e2 = new Edge(v2, w);
+                    int t0 = trussMap.get(e);
+                    int t1 = trussMap.get(e1);
+                    int t2 = trussMap.get(e2);
+                    int sSup1 = sSupMap.get(e1);
+                    int sSup2 = sSupMap.get(e2);
+
+                    if (t1 > t0 && t2 > t0) ps++;
+                    else if (t1 == t0 && t2 > t0 && sSup1 > t0 - 2) ps++;
+                    else if (t2 == t0 && t1 > t0 && sSup2 > t0 - 2) ps++;
+                    else if (t1 == t0 && t2 == t0 && sSup1 > t0 - 2 && sSup2 > t0 - 2) ps++;
+                }
+                pSupMap.put(e, ps);
+                updateList.add(e);
+            }
+        }
     }
 
     /**
@@ -340,7 +453,7 @@ public class GraphHandler {
         tempAdjMap = GraphHandler.insertEdgesToAdjMap(tempAdjMap, addEdges);
 
         tds.add(addEdges.poll());
-        if(addEdges.isEmpty()) return tds;
+        if (addEdges.isEmpty()) return tds;
 
         for (Edge e_new : addEdges) {
             LinkedList<Edge> e_new_triangleEdgeSet = getTriangleEdges(tempAdjMap, e_new); //new edges
@@ -350,7 +463,7 @@ public class GraphHandler {
                 Edge e_tds = tds.get(i);
                 LinkedList<Edge> e_tds_triangleEdgeSet = getTriangleEdges(tempAdjMap, e_tds);
                 if (haveCommonElement(e_new_triangleEdgeSet, e_tds_triangleEdgeSet)) {
-                    tdsFlag=false;
+                    tdsFlag = false;
                     break;
                 }
             }
@@ -422,14 +535,13 @@ public class GraphHandler {
                     break;
                 }
             }
-            if(tdsFlag) tds.add(e_new);
+            if (tdsFlag) tds.add(e_new);
         }
 
         tempAdjMap = GraphHandler.removeEdgesFromAdjMap(tempAdjMap, tds);
         removeEdges.removeAll(tds);
         return tds;
     }
-
 
 
 }

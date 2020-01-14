@@ -33,7 +33,9 @@ public class TCPIndex {
         for (int w : set0Common) {
             Edge e1 = new Edge(v1_e0, w);
             Edge e2 = new Edge(v2_e0, w);
-            commonTrussList.add(Math.min(trussMap.get(e1), trussMap.get(e2)));
+            int t1 = trussMap.get(e1) == null ? 0 : trussMap.get(e1);
+            int t2 = trussMap.get(e2) == null ? 0 : trussMap.get(e2);
+            commonTrussList.add(Math.min(t1, t2));
         }
 
         if (commonTrussList.size() == 0) {
