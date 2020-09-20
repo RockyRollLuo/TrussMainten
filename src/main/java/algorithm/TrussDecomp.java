@@ -22,7 +22,7 @@ public class TrussDecomp {
      * @return trussness of edges
      */
     public Result run() {
-        LOGGER.info("Start core decomposition...");
+        LOGGER.info("Start truss decomposition...");
 
         long startTime = System.currentTimeMillis();
 

@@ -1,8 +1,7 @@
 package equitruss;
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by Fernflower decompiler)
-//
+/**
+ *
+ */
 
 import java.io.IOException;
 import java.util.Collection;

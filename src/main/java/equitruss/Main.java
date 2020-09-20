@@ -12,13 +12,15 @@ import java.util.Scanner;
 public class Main {
 
 	public static void main(String[] args) throws IOException {
-		// TODO Auto-generated method stub
 		String fileName;
         String pathtec;
         int c;
         c = 1;
 //        System.out.println("path for graph file and path for index files is not given. Toy graph will be used");
-//        fileName = "data/amazon.ungraph.txt";
+
+        /**
+         * read graph
+         */
         fileName = "data/amazon.ungraph.txt";
         pathtec = "amazon";
         TecIndexG tec = new TecIndexSB();
@@ -28,16 +30,24 @@ public class Main {
         long endTime = System.nanoTime();
         System.out.print("graph read time: ");
         System.out.println((double)(endTime - startTime) / 1.0E9D);
-        
+
         if(c == 1) {
             Map<Edge, Integer> trussd = new HashMap<Edge, Integer>();
             createDir(pathtec);
+
+            /**
+             * computeTruss
+             */
             startTime = System.nanoTime();
             Map<Integer, LinkedHashSet<Edge>> klistdict = mg.computeTruss(pathtec, trussd);
             endTime = System.nanoTime();
             System.out.print("truss computation time: ");
             System.out.println((double)(endTime - startTime) / 1.0E9D);
             mg.write_support(pathtec + "/truss.txt", trussd);
+
+            /**
+             * constructIndex and write to file
+             */
             startTime = System.nanoTime();
             tec.constructIndex(klistdict, trussd, mg);
             endTime = System.nanoTime();
@@ -57,14 +67,19 @@ public class Main {
             test(tec);
         }
 	}
-	
+
+    /**
+     * query k-truss community for query node id
+     * @param tec
+     * @throws IOException
+     */
 	public static void test(TecIndexG tec) throws IOException {
         Scanner s = new Scanner(System.in);
         System.out.println("enter query node id and k:truss value");
-        Integer query = Integer.valueOf(Integer.parseInt(s.next()));
+        Integer query = Integer.valueOf(Integer.parseInt(s.next())); //query node id
 
         do {
-            int k = s.nextInt();
+            int k = s.nextInt(); // query k
             long startTime = System.nanoTime();
             LinkedList<LinkedList<Edge>> com = tec.findkCommunityForQuery(query.intValue(), k);
             long endTime = System.nanoTime();

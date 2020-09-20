@@ -1,8 +1,7 @@
 package equitruss;
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by Fernflower decompiler)
-//
+/**
+ * Truss-equivalence based index
+ */
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

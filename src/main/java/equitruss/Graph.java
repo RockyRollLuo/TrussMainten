@@ -17,6 +17,12 @@ public class Graph {
 	public Map<Integer,Map<Integer,Edge>> g;
 	long numberOfEdge;
 	long numberOfNodes;
+
+    /**
+     * read the graph file
+     * @param fileName
+     * @throws IOException
+     */
 	public void read_GraphEdgelist(String fileName) throws IOException{
 		this.g = new HashMap<Integer,Map<Integer,Edge>>();
 		File f = new File(fileName);
@@ -51,7 +57,12 @@ public class Graph {
         System.out.println("# of edges: " + this.numberOfEdge);
         System.out.println("# dmax: " + dmax);
 	}
-	
+
+    /**
+     * process one lin in read graph file
+     * @param aLine
+     * @return
+     */
 	protected int processLine(String aLine) {
 		StringTokenizer st = new StringTokenizer(aLine, "\t");
         int id1 = Integer.parseInt(st.nextToken().trim());
@@ -63,7 +74,7 @@ public class Graph {
         		Map<Integer,Edge> nl;
         		Edge me = new Edge(id1, id2);
         		
-        		//更新节点1
+        		//update vertex id1
         		if(!this.g.containsKey(Integer.valueOf(id1))) {
         			//如果节点不存在在g中，就需要向g中新增一个HashMap<Integer,Edge>
         			nl = new HashMap<Integer,Edge>();
@@ -90,17 +101,24 @@ public class Graph {
         		return 1;
         }
 	}
-	
+
+    /**
+     * com
+     * @param path
+     * @param trussd
+     * @return
+     * @throws IOException
+     */
 	public Map<Integer, LinkedHashSet<Edge>> computeTruss(String path, Map<Edge, Integer> trussd) throws IOException{
 		/*
-		 * 计算每条边的support
+		 * compute the support of each edge
 		 * */
 		HashMap<Edge, Integer> sp = new HashMap<Edge, Integer>();
         int kmax = this.computeSupport(sp);
 //        System.out.println("#kmax : " + kmax);
         
         /*
-         * 将support从小到大重新排序
+         * sort edges in ascending support order
          * */
         Edge[] sorted_elbys = new Edge[sp.size()];
         Map<Edge, Integer> sorted_ep = new HashMap<Edge, Integer>();
@@ -151,16 +169,6 @@ public class Graph {
 		klistdict.put(Integer.valueOf(k), kedgelist);
         return klistdict;
 	}
-	
-//	public int computeSupport2(HashMap<Edge, Integer> sp) {
-//		int maxs = 0; 
-//		Iterator<Integer> var5 = this.g.keySet().iterator();
-//		while(var5.hasNext()) {
-//			int v = var5.next();
-//			Iterator<Integer> var7 = g.get(v).keySet().iterator();
-//			
-//		}
-//	}
 	
     public int computeSupport(HashMap<Edge, Integer> sp) {
     	//计算每条边的support
@@ -281,7 +289,7 @@ public class Graph {
     Edge getEdge(int u, int v) {
         return (Edge)((HashMap<Integer,Edge>)this.g.get(Integer.valueOf(u))).get(Integer.valueOf(v));
     }
-    
+
     public void write_support(String filename, Map<Edge, Integer> trussd) throws IOException {
         FileWriter fileWriter = new FileWriter(filename);
         BufferedWriter bw = new BufferedWriter(fileWriter);
