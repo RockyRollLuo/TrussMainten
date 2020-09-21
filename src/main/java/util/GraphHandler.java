@@ -127,7 +127,6 @@ public class GraphHandler {
 
     /**
      * remove one edge from adjMap
-     *
      * @param adjMap original adjMap
      * @param e      removed edge
      * @return new adjMap
@@ -177,15 +176,93 @@ public class GraphHandler {
      * @return new graph
      */
     public static Graph removeEdgesFromGraph(Graph graph, LinkedList<Edge> changedEdges) {
-        LinkedList<Edge> oldEdgeSet = graph.getEdgeSet();
-        Hashtable<Integer, LinkedList<Integer>> oldAdjMap = graph.getAdjMap();
+        LinkedList<Edge> newEdgeSet = (LinkedList<Edge>)graph.getEdgeSet().clone();
+        Hashtable<Integer, LinkedList<Integer>> newAdjMap = (Hashtable<Integer, LinkedList<Integer>>) graph.getAdjMap().clone();
 
-        LinkedList<Edge> newEdgeSet = (LinkedList<Edge>) oldEdgeSet.clone();
         newEdgeSet.removeAll(changedEdges);
-
-        Hashtable<Integer, LinkedList<Integer>> newAdjMap = deepCloneAdjMap(oldAdjMap);
         newAdjMap = removeEdgesFromAdjMap(newAdjMap, changedEdges);
 
+        return new Graph(newAdjMap, newEdgeSet);
+    }
+
+    /**
+     *  remove one vertex from adjmap
+     * @param adjMap
+     * @param v
+     * @return
+     */
+    public static Hashtable<Integer, LinkedList<Integer>> removeVertexFromAdjMap(Hashtable<Integer, LinkedList<Integer>> adjMap, Integer v) {
+        Hashtable<Integer, LinkedList<Integer>> newAdjMap = (Hashtable<Integer, LinkedList<Integer>>) adjMap.clone();
+        Set<Integer> keySet = newAdjMap.keySet();
+        if (keySet.contains(v)) {
+            LinkedList<Integer> adjList=newAdjMap.get(v);
+            for(Integer u:adjList){
+                newAdjMap.get(u).remove(v);
+            }
+            newAdjMap.remove(v);
+        }
+        return newAdjMap;
+    }
+
+    /**
+     *  remove a set of vertex from adjmap
+     * @param adjMap
+     * @param vList
+     * @return
+     */
+    public static Hashtable<Integer, LinkedList<Integer>> removeVerticesFromAdjMap(Hashtable<Integer, LinkedList<Integer>> adjMap, LinkedList<Integer> vList) {
+        Hashtable<Integer, LinkedList<Integer>> newAdjMap = (Hashtable<Integer, LinkedList<Integer>>) adjMap.clone();
+        for (Integer v : vList) {
+            if (newAdjMap.keySet().contains(v)) {
+                LinkedList<Integer> adjList=newAdjMap.get(v);
+                for(Integer u:adjList){
+                    newAdjMap.get(u).remove(v);
+                }
+                newAdjMap.remove(v);
+            }
+        }
+        return newAdjMap;
+    }
+
+    /**
+     * remove one vertex from graph
+     * @param v
+     * @return
+     */
+    public static Graph removeVertexFromGraph(Graph graph, Integer v) {
+        Hashtable<Integer, LinkedList<Integer>> newAdjMap = (Hashtable<Integer, LinkedList<Integer>>) graph.getAdjMap().clone();
+        LinkedList<Edge> newEdgeSet = (LinkedList<Edge>) graph.getEdgeSet().clone();
+
+        if (newAdjMap.keySet().contains(v)) {
+            LinkedList<Integer> adjList=newAdjMap.get(v);
+            for(Integer u:adjList){
+                newAdjMap.get(u).remove(v);
+                newEdgeSet.remove(new Edge(u,v));
+            }
+            newAdjMap.remove(v);
+        }
+        return new Graph(newAdjMap, newEdgeSet);
+    }
+
+    /**
+     * remove a set of vertex from graph
+     * @param vList
+     * @return
+     */
+    public static Graph removeVerticesFromGraph(Graph graph, LinkedList<Integer> vList) {
+        Hashtable<Integer, LinkedList<Integer>> newAdjMap = (Hashtable<Integer, LinkedList<Integer>>) graph.getAdjMap().clone();
+        LinkedList<Edge> newEdgeSet = (LinkedList<Edge>) graph.getEdgeSet().clone();
+
+        for (Integer v : vList) {
+            if (newAdjMap.keySet().contains(v)) {
+                LinkedList<Integer> adjList=newAdjMap.get(v);
+                for(Integer u:adjList){
+                    newAdjMap.get(u).remove(v);
+                    newEdgeSet.remove(new Edge(u,v));
+                }
+                newAdjMap.remove(v);
+            }
+        }
         return new Graph(newAdjMap, newEdgeSet);
     }
 

@@ -81,35 +81,34 @@ public class RandomUtils {
      * random choose a small batch set from a set
      * If it's more than half, take the other half
      *
-     * @param edgeList
+     * @param list
      * @param nums     the size of small batch set
      * @return
      */
-    public static LinkedList<Edge> getRandomSetFromSet(LinkedList<Edge> edgeList, int nums) {
-        LOGGER.info("Start get random set from set - assume:" + nums + "/" + edgeList.size());
-        int N = edgeList.size();
+    public static <E> LinkedList<E> getRandomSetFromSet(LinkedList<E> list, int nums) {
+        LOGGER.info("Start get random set from set - assume:" + nums + "/" + list.size());
+        int N = list.size();
 
         if (nums == N) {
-            return new LinkedList<>(edgeList);
+            return new LinkedList<>(list);
         }
 
-        LinkedList<Edge> dynamicEdges = new LinkedList<>();
+        LinkedList<E> dynamicElements = new LinkedList<>();
         for (int i = 0; i < nums; i++) {
-            dynamicEdges.add(edgeList.get(i));
+            dynamicElements.add(list.get(i));
         }
 
         for (int i = nums; i < N; i++) {
             int r = getRandomInt(i + 1);
             if (r < nums) {
-                dynamicEdges.add(r, edgeList.get(i));
-                dynamicEdges.remove(r + 1);
+                dynamicElements.add(r, list.get(i));
+                dynamicElements.remove(r + 1);
             }
         }
 
-        LOGGER.info("End get random set from set - real:" + dynamicEdges.size() + "/" + edgeList.size());
-        return dynamicEdges;
+        LOGGER.info("End get random set from set - real:" + dynamicElements.size() + "/" + list.size());
+        return dynamicElements;
     }
-
 
 }
 

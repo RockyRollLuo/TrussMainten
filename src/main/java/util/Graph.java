@@ -29,6 +29,14 @@ public class Graph implements Cloneable{
         return new Graph(newAdjMap, newEdgeSet);
     }
 
+    public LinkedList<Integer> getVerticesSet(){
+        return new LinkedList<>(this.adjMap.keySet());
+    }
+
+    public int getVerticesSize(){
+        return this.adjMap.keySet().size();
+    }
+
     /**
      * Getter() and Setter()
      */
@@ -47,4 +55,9 @@ public class Graph implements Cloneable{
     public void setEdgeSet(LinkedList<Edge> edgeSet) {
         this.edgeSet = edgeSet;
     }
+
+
+
+
+
 }
