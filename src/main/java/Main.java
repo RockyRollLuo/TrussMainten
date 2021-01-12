@@ -12,7 +12,7 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 
 public class Main {
-    private static Logger LOGGER = Logger.getLogger(Main.class);
+    private static final Logger LOGGER = Logger.getLogger(Main.class);
     @Option(abbr = 'p', usage = "Print trussMap")
     public static int print = 1;
 

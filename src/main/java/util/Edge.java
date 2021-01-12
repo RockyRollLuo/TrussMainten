@@ -1,6 +1,7 @@
 package util;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 
 public class Edge implements Comparable<Edge>, Cloneable, Serializable {
@@ -30,7 +31,10 @@ public class Edge implements Comparable<Edge>, Cloneable, Serializable {
 
     @Override
     public int hashCode() {
-        return (v1 * 31) + v2;
+        int minPoint = Math.min(this.v1, this.v2);
+        int maxPoint = Math.max(this.v1, this.v2);
+        return (minPoint * 31) + maxPoint;
+//        return Objects.hash(v1,v2);
     }
 
     @Override

@@ -2,6 +2,7 @@ package util;
 
 import algorithm.TrussDecomp;
 import org.apache.log4j.Logger;
+import sun.security.provider.certpath.Vertex;
 
 import java.util.*;
 
@@ -45,6 +46,13 @@ public class GraphHandler {
             triangleEdgeSet.add(new Edge(a, c));
             triangleEdgeSet.add(new Edge(b, c));
         }
+        return triangleEdgeSet;
+    }
+
+    public static LinkedList<Edge> getTriangleEdges(Hashtable<Integer, LinkedList<Integer>> adjMap, Integer v) {
+        LinkedList<Edge> triangleEdgeSet = new LinkedList<>();
+
+
         return triangleEdgeSet;
     }
 
@@ -550,36 +558,6 @@ public class GraphHandler {
         }
         addEdges.removeAll(tds);
         return tds;
-
-//        //the first edge of addEdges must be one of tds
-//        Edge firstEdge = addEdges.poll();
-//        tds.add(firstEdge);
-//        tempAdjMap = GraphHandler.insertEdgeToAdjMap(tempAdjMap, firstEdge);
-//
-//        if (addEdges.isEmpty()) {
-//            return tds;
-//        }
-//        for (Edge e_new : addEdges) {
-//            tempAdjMap = GraphHandler.insertEdgeToAdjMap(tempAdjMap, e_new);
-//            LinkedList<Edge> e_new_triangleEdgeSet = getTriangleEdges(tempAdjMap, e_new); //new edges
-//
-//            boolean tdsFlag = true;
-//            for (int i = 0; i < tds.size(); i++) {
-//                Edge e_tds = tds.get(i);
-//                LinkedList<Edge> e_tds_triangleEdgeSet = getTriangleEdges(tempAdjMap, e_tds);
-//                if (haveCommonElement(e_new_triangleEdgeSet, e_tds_triangleEdgeSet)) {
-//                    tempAdjMap = GraphHandler.removeEdgeFromAdjMap(tempAdjMap, e_new);
-//                    tdsFlag = false;
-//                    break;
-//                }
-//            }
-//            if (tdsFlag) {
-//                tds.add(e_new);
-//            }
-//
-//        }
-//        addEdges.removeAll(tds);
-//        return tds;
     }
 
 
@@ -619,6 +597,9 @@ public class GraphHandler {
         removeEdges.removeAll(tds);
         return tds;
     }
+
+
+
 
 
 }
